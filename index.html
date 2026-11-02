@@ -354,7 +354,7 @@
                     </label>
                     <input type="url" id="webhookUrlInput" placeholder="https://script.google.com/macros/s/.../exec"
                         class="w-full px-4 py-3 rounded-xl border border-slate-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 font-mono text-xs bg-slate-50">
-                    <p class="text-[11px] text-slate-500 mt-1">URL ini akan tersimpan otomatis di browser ini (localStorage).</p>
+                    <p class="text-[11px] text-slate-500 mt-1">Anda juga dapat langsung memasukkan URL ini ke variabel <code>DEFAULT_WEBHOOK_URL</code> di dalam kode HTML.</p>
                 </div>
 
                 <!-- Quick Setup Instructions Accordion -->
@@ -374,18 +374,26 @@
                             <i class="fa-solid fa-copy"></i> Salin Kode
                         </button>
 <pre id="appsScriptCode">function doPost(e) {
-  var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
-  var data = JSON.parse(e.postData.contents);
-  sheet.appendRow([
-    new Date(),
-    data.nama,
-    data.kelas,
-    data.skor,
-    data.benar,
-    data.salah,
-    data.durasi
-  ]);
-  return ContentService.createTextOutput("Success").setMimeType(ContentService.MimeType.TEXT);
+  try {
+    var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+    var data = JSON.parse(e.postData.contents);
+    if (sheet.getLastRow() === 0) {
+      sheet.appendRow(["Tanggal", "Nama Siswa", "Kelas", "Skor (0-100)", "Benar", "Salah", "Durasi Pengerjaan"]);
+      sheet.getRange(1, 1, 1, 7).setFontWeight("bold").setBackground("#e2e8f0");
+    }
+    sheet.appendRow([
+      new Date(),
+      data.nama,
+      data.kelas,
+      data.skor,
+      data.benar,
+      data.salah,
+      data.durasi
+    ]);
+    return ContentService.createTextOutput("Success").setMimeType(ContentService.MimeType.TEXT);
+  } catch(err) {
+    return ContentService.createTextOutput("Error: " + err.toString());
+  }
 }</pre>
                     </div>
 
@@ -393,14 +401,14 @@
                         <li>Klik tombol <strong>Terapkan (Deploy) &gt; Penerapan Baru (New Deployment)</strong>.</li>
                         <li>Pilih Jenis: <strong>Aplikasi Web (Web App)</strong>.</li>
                         <li>Ubah <em>Who has access (Siapa yang memiliki akses)</em> menjadi: <strong>Anyone (Siapa Saja)</strong>.</li>
-                        <li>Klik <strong>Terapkan</strong>, lalu salin <strong>URL Aplikasi Web</strong> dan tempel ke kolom di atas.</li>
+                        <li>Klik <strong>Terapkan</strong>, lalu salin <strong>URL Aplikasi Web</strong> dan tempel ke dalam file ini.</li>
                     </ol>
                 </div>
             </div>
 
             <div class="p-4 border-t border-slate-200 bg-slate-50 flex items-center justify-between">
                 <button onclick="clearWebhookUrl()" class="text-rose-600 hover:text-rose-800 font-bold text-xs">
-                    Hapus Webhook
+                    Hapus Webhook Lokal
                 </button>
                 <button onclick="saveTeacherSettings()" class="px-6 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold text-xs shadow-md">
                     <i class="fa-solid fa-floppy-disk"></i> Simpan Pengaturan
@@ -436,6 +444,12 @@
 
     <!-- JavaScript Quiz Logic -->
     <script>
+        // =========================================================================
+        // TEMPELKAN URL GOOGLE APPS SCRIPT ANDA DI SINI
+        // Contoh: const DEFAULT_WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbx.../exec";
+        // =========================================================================
+        const DEFAULT_WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbxKyHtE782CkV40Wnpwl1GqK3ihHKX3knPlx3H5TVAu/dev";
+
         // 20 SOAL INFORMATIKA KELAS 9 (Tree, Graph, Scratch, Blockly)
         const questions = [
             // TREE (5 SOAL)
@@ -493,7 +507,7 @@
                 question: "Dua komponen utama pembentuk struktur data Graf (Graph) yang menyatakan objek dan hubungan antarobjek berturut-turut adalah...",
                 options: ["Akar (Root) dan Daun (Leaf)", "Simpul (Vertex) dan Sisi (Edge)", "Sprite dan Stage", "Block dan Workspace"],
                 answer: 1,
-                explanation: "Graf dibentuk oleh **Vertex (Simpul/Node)** sebagai objek dan **Edge (Sisi/Garis)** sebagai hubungan."
+                explanation: "Graf dibentuk oleh <strong>Vertex (Simpul/Node)</strong> sebagai objek dan <strong>Edge (Sisi/Garis)</strong> sebagai hubungan."
             },
             {
                 topic: "Graph (Graf)",
@@ -502,7 +516,7 @@
                 question: "Jaringan pertemanan Facebook di mana jika A berteman dengan B maka B otomatis berteman dengan A paling tepat dimodelkan sebagai...",
                 options: ["Graf Tak Berarah (Undirected Graph)", "Graf Berarah (Directed Graph)", "Graf Pohon (Tree)", "Graf Linier"],
                 answer: 0,
-                explanation: "Hubungan pertemanan dua arah simetris dimodelkan menggunakan **Graf Tak Berarah**."
+                explanation: "Hubungan pertemanan dua arah simetris dimodelkan menggunakan <strong>Graf Tak Berarah</strong>."
             },
             {
                 topic: "Graph (Graf)",
@@ -511,7 +525,7 @@
                 question: "Sistem pengikut (follower) di media sosial seperti Instagram (A bisa mengikuti B tanpa B harus mengikuti A) menggunakan konsep...",
                 options: ["Graf Tak Berarah (Undirected Graph)", "Graf Berarah (Directed Graph)", "Struktur Pohon (Tree)", "Graf Terbobot Tunggal"],
                 answer: 1,
-                explanation: "Hubungan satu arah (memiliki panah petunjuk) dinamakan **Graf Berarah (Directed Graph)**."
+                explanation: "Hubungan satu arah (memiliki panah petunjuk) dinamakan <strong>Graf Berarah (Directed Graph)</strong>."
             },
             {
                 topic: "Graph (Graf)",
@@ -520,7 +534,7 @@
                 question: "Peta jaringan jalan antar-kota yang mencantumkan nilai angka jarak (kilometer) pada setiap lintasannya dinamakan...",
                 options: ["Graf Terbobot (Weighted Graph)", "Graf Akar", "Graf Kosong", "Graf Tunggal"],
                 answer: 0,
-                explanation: "Graf yang sisinya memiliki bobot nilai (seperti jarak, waktu, atau biaya) disebut **Graf Terbobot**."
+                explanation: "Graf yang sisinya memiliki bobot nilai (seperti jarak, waktu, atau biaya) disebut <strong>Graf Terbobot</strong>."
             },
             {
                 topic: "Graph (Graf)",
@@ -529,7 +543,7 @@
                 question: "Aplikasi navigasi GPS (seperti Google Maps) mencari jalur paling cepat dari lokasi asal ke tujuan menggunakan konsep algoritma...",
                 options: ["Pencarian Lintasan Terpendek pada Graf", "Pengurutan Data Pohon", "Perulangan Blok Scratch", "Penyusunan Puzzle Blockly"],
                 answer: 0,
-                explanation: "Aplikasi GPS memodelkan jalan sebagai Graf dan menghitung lintasan terpendek (*Shortest Path*)."
+                explanation: "Aplikasi GPS memodelkan jalan sebagai Graf dan menghitung lintasan terpendek (<em>Shortest Path</em>)."
             },
 
             // SCRATCH (5 SOAL)
@@ -558,7 +572,7 @@
                 question: "Tombol berikon Bendera Hijau (Green Flag) pada Scratch berfungsi untuk...",
                 options: ["Menghapus Sprite", "Memulai / menjalankan skrip program", "Menghentikan program", "Menyimpan file"],
                 answer: 1,
-                explanation: "Bendera hijau (Events `when green flag clicked`) digunakan untuk memicu mulainya eksekusi program."
+                explanation: "Bendera hijau (Events <code>when green flag clicked</code>) digunakan untuk memicu mulainya eksekusi program."
             },
             {
                 topic: "Scratch",
@@ -567,7 +581,7 @@
                 question: "Blok perintah warna biru Scratch berpemberitahuan 'move 10 steps' berfungsi untuk...",
                 options: ["Mengubah warna karakter", "Menggerakkan Sprite maju 10 langkah", "Memutar karakter 10 derajat", "Mengulangi perintah 10 kali"],
                 answer: 1,
-                explanation: "Blok `move 10 steps` termasuk kelompok **Motion** untuk menggerakkan Sprite."
+                explanation: "Blok <code>move 10 steps</code> termasuk kelompok <strong>Motion</strong> untuk menggerakkan Sprite."
             },
             {
                 topic: "Scratch",
@@ -576,7 +590,7 @@
                 question: "Jika perintah 'move 10 steps' dimasukkan di dalam blok 'repeat 10', maka Sprite akan bergerak total...",
                 options: ["10 langkah", "20 langkah", "100 langkah", "0 langkah"],
                 answer: 2,
-                explanation: "Blok `repeat 10` mengulangi gerakan 10 langkah sebanyak 10 kali ($10 \\times 10 = 100$ langkah)."
+                explanation: "Blok <code>repeat 10</code> mengulangi gerakan 10 langkah sebanyak 10 kali ($10 \\times 10 = 100$ langkah)."
             },
 
             // BLOCKLY (5 SOAL)
@@ -587,7 +601,7 @@
                 question: "Blockly merupakan pustaka pemrograman visual yang memungkinkan kita membuat kode perintah dengan cara...",
                 options: ["Menulis baris teks kode manual", "Menyusun dan memasangkan balok-balok puzzle", "Menggambar garis vektor", "Mengedit rekaman suara"],
                 answer: 1,
-                explanation: "Blockly berbasis visual di mana perintah disusun seperti memasangkan **balok-balok puzzle**."
+                explanation: "Blockly berbasis visual di mana perintah disusun seperti memasangkan <strong>balok-balok puzzle</strong>."
             },
             {
                 topic: "Blockly",
@@ -838,8 +852,15 @@
         let timerInterval = null;
         let isTimeUp = false;
 
-        // Teacher Webhook URL (stored in localStorage)
-        let teacherWebhookUrl = localStorage.getItem('teacher_webhook_url') || "";
+        // Get effective Webhook URL (Default preset or local storage override)
+        function getActiveWebhookUrl() {
+            const localUrl = localStorage.getItem('teacher_webhook_url');
+            if (localUrl && localUrl.trim() !== "") return localUrl.trim();
+            if (DEFAULT_WEBHOOK_URL && DEFAULT_WEBHOOK_URL !== "MASUKKAN_URL_WEBHOOK_APPS_SCRIPT_ANDA_DI_SINI") {
+                return DEFAULT_WEBHOOK_URL.trim();
+            }
+            return "";
+        }
 
         // Web Audio API Sound generator
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -888,11 +909,11 @@
         // Initialize Webhook Status Badge on Screen 1
         function renderSheetStatusBadge() {
             const badge = document.getElementById('sheetStatusBadge');
-            teacherWebhookUrl = localStorage.getItem('teacher_webhook_url') || "";
+            const activeUrl = getActiveWebhookUrl();
 
-            if (teacherWebhookUrl) {
+            if (activeUrl) {
                 badge.className = "max-w-md mx-auto mb-5 p-2.5 rounded-xl text-xs font-bold flex items-center justify-center gap-2 border bg-emerald-50 text-emerald-800 border-emerald-200";
-                badge.innerHTML = `<i class="fa-solid fa-circle-check text-emerald-600"></i> Terhubung ke Google Sheets Guru`;
+                badge.innerHTML = `<i class="fa-solid fa-circle-check text-emerald-600"></i> Terhubung ke Google Sheets Guru (Nilai Otomatis Terkirim)`;
             } else {
                 badge.className = "max-w-md mx-auto mb-5 p-2.5 rounded-xl text-xs font-bold flex items-center justify-center gap-2 border bg-amber-50 text-amber-800 border-amber-200";
                 badge.innerHTML = `<i class="fa-solid fa-circle-info text-amber-600"></i> Integrasi Google Sheets Belum Dikonfigurasi 
@@ -901,7 +922,7 @@
         }
 
         function openTeacherModal() {
-            document.getElementById('webhookUrlInput').value = localStorage.getItem('teacher_webhook_url') || "";
+            document.getElementById('webhookUrlInput').value = getActiveWebhookUrl();
             document.getElementById('teacherModal').classList.remove('hidden');
         }
 
@@ -912,14 +933,12 @@
         function saveTeacherSettings() {
             const url = document.getElementById('webhookUrlInput').value.trim();
             localStorage.setItem('teacher_webhook_url', url);
-            teacherWebhookUrl = url;
             renderSheetStatusBadge();
             closeTeacherModal();
         }
 
         function clearWebhookUrl() {
             localStorage.removeItem('teacher_webhook_url');
-            teacherWebhookUrl = "";
             document.getElementById('webhookUrlInput').value = "";
             renderSheetStatusBadge();
             closeTeacherModal();
@@ -1211,11 +1230,11 @@
         // Automatic Google Sheets HTTP POST Request Handler
         function sendResultsToGoogleSheets(scorePercentage, correctCnt, wrongCnt, formattedTimeSpent) {
             const statusBanner = document.getElementById('sheetSendStatusBanner');
-            teacherWebhookUrl = localStorage.getItem('teacher_webhook_url') || "";
+            const activeUrl = getActiveWebhookUrl();
 
-            if (!teacherWebhookUrl) {
+            if (!activeUrl) {
                 statusBanner.className = "mb-5 p-3.5 rounded-2xl border text-xs font-bold flex items-center justify-center gap-2 bg-amber-50 text-amber-800 border-amber-200";
-                statusBanner.innerHTML = `<i class="fa-solid fa-triangle-exclamation text-amber-600"></i> Mode Offline: Nilai tidak dikirim otomatis (Webhook Google Sheets Belum Dikonfigurasi Guru).`;
+                statusBanner.innerHTML = `<i class="fa-solid fa-triangle-exclamation text-amber-600"></i> Mode Offline: Nilai tidak dikirim otomatis (Webhook Google Sheets Belum Dikonfigurasi).`;
                 return;
             }
 
@@ -1232,7 +1251,7 @@
                 durasi: formattedTimeSpent
             };
 
-            fetch(teacherWebhookUrl, {
+            fetch(activeUrl, {
                 method: 'POST',
                 mode: 'no-cors', // standard cross-origin mode for Google Apps Script Web App
                 headers: { 'Content-Type': 'application/json' },
