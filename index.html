@@ -8,16 +8,9 @@
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
-    body {
-      font-family: 'Plus Jakarta Sans', sans-serif;
-    }
-    .pulse-animation {
-      animation: pulse 1.5s infinite;
-    }
-    @keyframes pulse {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.4; }
-    }
+    body { font-family: 'Plus Jakarta Sans', sans-serif; }
+    .pulse-animation { animation: pulse 1.5s infinite; }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
     @media print {
       .no-print { display: none !important; }
       .print-only { display: block !important; }
@@ -40,7 +33,7 @@
         </div>
       </div>
       
-      <!-- Display Timer (Hanya Muncul Saat Ujian) -->
+      <!-- Display Timer -->
       <div id="header-timer" class="hidden flex items-center space-x-2 bg-indigo-800 px-3 py-1.5 rounded-lg border border-indigo-500/30">
         <i class="fa-solid fa-clock text-amber-300"></i>
         <span id="timer-display" class="font-mono font-bold text-sm tracking-wide text-white">20:00</span>
@@ -75,7 +68,7 @@
         <div class="bg-indigo-50 rounded-xl p-4 border border-indigo-100 text-xs text-indigo-900 space-y-1 mt-4">
           <p class="font-semibold flex items-center gap-1.5"><i class="fa-solid fa-circle-info"></i> Ketentuan Ulangan:</p>
           <ul class="list-disc list-inside space-y-0.5 text-indigo-800">
-            <li>Jumlah Soal: <strong>20 Soal Pilihan Ganda</strong></li>
+            <li>Jumlah Soal: <strong>20 Soal Pilihan Ganda (Acak)</strong></li>
             <li>Waktu Pengerjaan: <strong>20 Menit</strong></li>
             <li>Hasil nilai akan dikumpulkan secara otomatis ke sistem guru.</li>
           </ul>
@@ -106,7 +99,7 @@
       <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
         <div class="text-xs font-semibold text-slate-500 mb-2">Navigasi Soal:</div>
         <div id="question-grid" class="grid grid-cols-10 sm:grid-cols-20 gap-1.5">
-          <!-- Button 1-20 akan di-generate via JS -->
+          <!-- Button 1-20 via JS -->
         </div>
       </div>
 
@@ -128,7 +121,7 @@
 
         <!-- Pilihan Jawaban -->
         <div id="options-container" class="space-y-3">
-          <!-- Opsi di-generate via JS -->
+          <!-- Opsi via JS -->
         </div>
       </div>
 
@@ -205,21 +198,20 @@
         </div>
       </div>
 
-      <!-- Section Tinjauan Pembahasan (Awalnya tersembunyi) -->
+      <!-- Pembahasan & Kunci Jawaban -->
       <div id="review-section" class="hidden bg-white rounded-2xl shadow-xl border border-slate-200 p-6 space-y-6">
         <h3 class="text-lg font-bold text-slate-800 border-b border-slate-100 pb-3 flex items-center justify-between">
           <span>Pembahasan & Kunci Jawaban</span>
           <span class="text-xs font-normal text-slate-400">20 Soal</span>
         </h3>
         <div id="review-container" class="space-y-4">
-          <!-- Item Tinjauan di-generate via JS -->
+          <!-- Item Tinjauan via JS -->
         </div>
       </div>
     </section>
 
   </main>
 
-  <!-- FOOTER -->
   <footer class="bg-white border-t border-slate-200 py-4 text-center text-xs text-slate-400 no-print">
     <p>© Media Ulangan Interaktif Informatika SMP Kelas 9</p>
   </footer>
@@ -229,177 +221,157 @@
     // =========================================================================
     // ⚙️ KONFIGURASI WEBHOOK GOOGLE APPS SCRIPT GURU
     // =========================================================================
-    // Tempelkan URL Google Apps Script Anda di dalam tanda kutip di bawah ini:
     const DEFAULT_WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbxrBDzlgbg_INBWgIVyFK-3bg3DO9mK01iHtZGPmfdDfBFw4xurRAm8s9L0BInpdMuaQg/exec";
     // =========================================================================
 
-    // DATA SOAL (20 SOAL PILIHAN GANDA)
-    const questions = [
-      // TREE (5 Soal)
-      {
-        category: "Struktur Data Tree",
-        question: "Simpul utama pada bagian paling atas struktur Pohon (Tree) yang tidak memiliki induk (parent) dinamakan...",
-        options: ["Simpul Akar (Root)", "Simpul Daun (Leaf)", "Simpul Anak (Child)", "Simpul Cabang (Branch)"],
-        answer: 0,
-        explanation: "Simpul Akar (Root) adalah simpul tertinggi dalam hierarki struktur data Pohon yang menjadi titik awal dan tidak memiliki induk."
+    // DATABASE SOAL DARI VARIATION 1-8 (STRUKTUR DATA TREE & GRAPH)
+    const gameVariations = {
+      1: {
+        quiz: [
+          {q: "Simpul paling atas dalam struktur Tree disebut...", options: ["Leaf", "Root", "Edge", "Parent"], a: 1},
+          {q: "Jalur yang menghubungkan dua Node pada Graph disebut...", options: ["Edge", "Root", "Child", "Vertex"], a: 0},
+          {q: "Manakah yang cocok menggunakan struktur Graph?", options: ["Silsilah Keluarga", "Struktur Organisasi", "Peta Navigasi (Maps)", "Daftar Isi Buku"], a: 2},
+          {q: "Simpul yang tidak memiliki anak dalam Tree disebut...", options: ["Parent", "Root", "Edge", "Leaf"], a: 3},
+          {q: "Apa fungsi utama struktur data?", options: ["Membuat komputer lambat", "Mengatur data agar mudah dikelola", "Menghapus virus", "Mengganti komponen hardware"], a: 1}
+        ]
       },
-      {
-        category: "Struktur Data Tree",
-        question: "Simpul dalam struktur Pohon (Tree) yang tidak memiliki simpul anak (child) sama sekali dinamakan...",
-        options: ["Simpul Utama", "Simpul Induk (Parent)", "Simpul Daun (Leaf)", "Simpul Akar (Root)"],
-        answer: 2,
-        explanation: "Simpul Daun (Leaf) merupakan simpul yang berada di posisi paling ujung bawah dan tidak memiliki simpul anak."
+      2: {
+        quiz: [
+          {q: "Simpul yang memiliki cabang/anak di bawahnya disebut...", options: ["Parent", "Leaf", "Root", "Edge"], a: 0},
+          {q: "Titik-titik lokasi dalam sebuah Graph disebut...", options: ["Edge", "Node", "Root", "Leaf"], a: 1},
+          {q: "Manakah yang tepat menggunakan struktur Tree?", options: ["Jalur Kereta Api", "Silsilah Keluarga", "Jaringan Internet", "Peta Jalan Raya"], a: 1},
+          {q: "Dalam Graph, tidak ada istilah...", options: ["Node", "Edge", "Root", "Jalur"], a: 2},
+          {q: "Struktur data yang tidak memiliki hierarki adalah...", options: ["Tree", "Graph", "Binary Tree", "Folder"], a: 1}
+        ]
       },
-      {
-        category: "Struktur Data Tree",
-        question: "Manakah sistem berikut yang paling tepat dimodelkan menggunakan struktur data Pohon (Tree)?",
-        options: ["Rute peta penerbangan pesawat", "Struktur folder dan direktori pada komputer", "Jaringan pertemanan media sosial", "Sistem jalan raya antar kota"],
-        answer: 1,
-        explanation: "Struktur direktori/folder komputer berbentuk hierarki bertingkat (Folder Utama -> Subfolder -> File) yang sangat cocok menggunakan Tree."
+      3: {
+        quiz: [
+          {q: "Manakah pernyataan yang benar tentang Tree?", options: ["Memiliki siklus/putaran", "Satu node bisa memiliki banyak parent", "Pasti memiliki Root", "Tidak memiliki edge"], a: 2},
+          {q: "Bagian yang menghubungkan antar tempat di Google Maps diwakili oleh...", options: ["Node", "Root", "Edge", "Leaf"], a: 2},
+          {q: "Manakah yang bukan komponen Tree?", options: ["Root", "Siklus (Cycle)", "Leaf", "Parent"], a: 1},
+          {q: "Struktur yang cocok untuk merepresentasikan jadwal penerbangan adalah...", options: ["Tree", "Folder", "List", "Graph"], a: 3},
+          {q: "Apa yang membuat data disebut terstruktur?", options: ["Tersimpan di flashdisk", "Ukurannya besar", "Memiliki pola dan aturan penyimpanan", "Hanya bisa dibuka oleh programmer"], a: 2}
+        ]
       },
-      {
-        category: "Struktur Data Tree",
-        question: "Sebuah struktur Pohon (Tree) yang terhubung memiliki 10 simpul (node). Berapakah jumlah sisi (edge) yang dimiliki oleh pohon tersebut?",
-        options: ["10 sisi", "9 sisi", "11 sisi", "8 sisi"],
-        answer: 1,
-        explanation: "Secara matematis, sebuah Pohon terhubung dengan n simpul selalu memiliki tepat (n - 1) sisi. Jadi jika n = 10, jumlah sisi = 9."
+      4: {
+        quiz: [
+          {q: "Dalam struktur file, file docx yang berada di dalam folder bertindak sebagai...", options: ["Root", "Edge", "Leaf", "Graph"], a: 2},
+          {q: "Ciri khas Graph dibandingkan Tree adalah...", options: ["Memiliki Root", "Memiliki tingkatan", "Bebas terhubung (bisa siklus)", "Hanya untuk angka"], a: 2},
+          {q: "Untuk mencari rute terpendek, algoritma akan berjalan pada struktur data...", options: ["Tree", "Graph", "Queue", "Stack"], a: 1},
+          {q: "Manakah yang disebut sebagai Child dalam struktur hierarki sekolah?", options: ["Kepala Sekolah", "Siswa terhadap Wali Kelas", "Gedung Sekolah", "Lapangan"], a: 1},
+          {q: "Simpul awal tempat penelusuran dimulai pada Tree disebut...", options: ["Root", "Node Akhir", "Edge", "Parent"], a: 0}
+        ]
       },
-      {
-        category: "Struktur Data Tree",
-        question: "Pada struktur data Pohon, hubungan antara folder utama dengan sub-folder di dalamnya digambarkan sebagai hubungan...",
-        options: ["Tetangga (Neighbor)", "Induk dan Anak (Parent and Child)", "Simpul Berarah", "Garis Sejajar"],
-        answer: 1,
-        explanation: "Folder utama bertindak sebagai Parent (Induk) dan sub-folder di dalamnya bertindak sebagai Child (Anak)."
+      5: {
+        quiz: [
+          {q: "Node yang tidak punya anak dinamakan...", options: ["Root", "Leaf", "Edge", "Branch"], a: 1},
+          {q: "Hubungan dua kota di peta dihubungkan oleh...", options: ["Leaf", "Root", "Edge", "Parent"], a: 2},
+          {q: "Bagan pertandingan piala dunia menggunakan struktur...", options: ["Graph", "Tree", "Array", "Database"], a: 1},
+          {q: "Aplikasi yang sangat bergantung pada Graph adalah...", options: ["Google Maps", "Kalkulator", "Notepad", "Pemutar Musik"], a: 0},
+          {q: "Manfaat struktur data adalah...", options: ["Memperberat komputer", "Pencarian lebih cepat dan rapi", "Menambah virus", "Mempersulit user"], a: 1}
+        ]
       },
-
-      // GRAPH (5 Soal)
-      {
-        category: "Struktur Data Graf",
-        question: "Dua komponen utama yang membentuk struktur data Graf (Graph) adalah...",
-        options: ["Akar (Root) dan Daun (Leaf)", "Simpul (Vertex) dan Sisi (Edge)", "Baris (Row) dan Kolom (Column)", "Blok (Block) dan Skrip (Script)"],
-        answer: 1,
-        explanation: "Graf dibangun oleh Simpul/Vertex (objek/titik) dan Sisi/Edge (garis hubungan antarobjek)."
+      6: {
+        quiz: [
+          {q: "Dalam Tree, elemen atas yang memayungi anak disebut...", options: ["Leaf", "Child", "Parent", "Edge"], a: 2},
+          {q: "Jarak atau bobot pada Graph biasanya menempel pada...", options: ["Node", "Edge", "Root", "Leaf"], a: 1},
+          {q: "Graph dapat memiliki rute memutar (loop/siklus), sedangkan Tree...", options: ["Pasti memutar", "Tidak boleh memutar", "Kadang memutar", "Semuanya memutar"], a: 1},
+          {q: "File Tugas.docx di dalam Folder Informatika adalah contoh dari...", options: ["Edge", "Root", "Parent", "Leaf"], a: 3},
+          {q: "Jika data memiliki tingkat/kasta, struktur yang pas adalah...", options: ["Graph", "Tree", "Acak", "List"], a: 1}
+        ]
       },
-      {
-        category: "Struktur Data Graf",
-        question: "Jaringan media sosial di mana hubungan pertemanan bersifat dua arah secara otomatis (jika A berteman dengan B, maka B berteman dengan A) paling tepat dimodelkan sebagai...",
-        options: ["Graf Tak Berarah (Undirected Graph)", "Graf Berarah (Directed Graph)", "Pohon Akar (Rooted Tree)", "Graf Terbobot (Weighted Graph)"],
-        answer: 0,
-        explanation: "Graf tak berarah melambangkan hubungan simetris atau dua arah tanpa panah petunjuk."
+      7: {
+        quiz: [
+          {q: "Root terletak di bagian mana pada Tree?", options: ["Kanan", "Bawah", "Paling Atas", "Tengah"], a: 2},
+          {q: "Sistem pertemanan (Mutual Friends) adalah contoh dari...", options: ["Tree", "Graph", "Folder", "Root"], a: 1},
+          {q: "Pada Graph, Kota A dan Kota B disebut sebagai...", options: ["Node", "Edge", "Root", "Leaf"], a: 0},
+          {q: "Dalam folder komputer, Partisi C:\\ adalah...", options: ["Leaf", "Edge", "Root", "Child"], a: 2},
+          {q: "Mencari teman dari temannya teman adalah operasi penelusuran pada...", options: ["Tree", "Graph", "File", "Sistem"], a: 1}
+        ]
       },
-      {
-        category: "Struktur Data Graf",
-        question: "Sistem 'Follower' di media sosial (misal: A mengikuti B, tetapi B belum tentu mengikuti A) paling tepat dimodelkan sebagai...",
-        options: ["Graf Tak Berarah", "Graf Berarah (Directed Graph)", "Struktur Pohon", "Graf Lingkar"],
-        answer: 1,
-        explanation: "Graf berarah memiliki tanda panah yang menunjukkan arah hubungan satu arah antar simpul."
-      },
-      {
-        category: "Struktur Data Graf",
-        question: "Aplikasi peta navigasi GPS memuat informasi jarak (km) atau waktu tempuh pada setiap rute jalan. Jenis graf yang digunakan adalah...",
-        options: ["Graf Tanpa Sisi", "Graf Terbobot (Weighted Graph)", "Graf Pohon", "Graf Kosong"],
-        answer: 1,
-        explanation: "Graf terbobot memberi nilai (bobot) seperti jarak, waktu, atau biaya pada setiap sisinya."
-      },
-      {
-        category: "Struktur Data Graf",
-        question: "Jumlah sisi yang terhubung secara langsung pada suatu simpul dalam graf tak berarah disebut...",
-        options: ["Akar (Root)", "Derajat (Degree)", "Kedalaman (Depth)", "Tingkat (Level)"],
-        answer: 1,
-        explanation: "Derajat (Degree) adalah banyaknya garis/sisi yang menempel pada suatu titik/simpul."
-      },
-
-      // SCRATCH (5 Soal)
-      {
-        category: "Pemrograman Visual Scratch",
-        question: "Karakter atau objek utama pada Scratch yang dapat diberi perintah dan bergerak dinamakan...",
-        options: ["Stage", "Sprite", "Script", "Backdrop"],
-        answer: 1,
-        explanation: "Sprite adalah objek visual (seperti kucing Scratch) yang diprogram untuk menjalankan aksi."
-      },
-      {
-        category: "Pemrograman Visual Scratch",
-        question: "Area panggung tempat Sprite bergerak, berinteraksi, dan tampil pada aplikasi Scratch disebut...",
-        options: ["Workspace", "Palette", "Stage", "Costume"],
-        answer: 2,
-        explanation: "Stage adalah layar panggung tempat jalannya animasi atau game Scratch."
-      },
-      {
-        category: "Pemrograman Visual Scratch",
-        question: "Blok perintah pada Scratch yang digunakan untuk menjalankan program saat tombol bendera hijau diklik termasuk kelompok kategori...",
-        options: ["Motion", "Events", "Control", "Sensing"],
-        answer: 1,
-        explanation: "Kategori Events (warna kuning) memuat pemicu program seperti 'when green flag clicked'."
-      },
-      {
-        category: "Pemrograman Visual Scratch",
-        question: "Blok berwarna biru yang berisi perintah 'move 10 steps' berfungsi untuk...",
-        options: ["Mengubah warna karakter", "Menggerakkan Sprite maju sebanyak 10 langkah", "Mengulang perintah 10 kali", "Mengeluarkan suara selama 10 detik"],
-        answer: 1,
-        explanation: "Blok 'move 10 steps' berada di kategori Motion yang berfungsi memindahkan posisi Sprite."
-      },
-      {
-        category: "Pemrograman Visual Scratch",
-        question: "Blok perintah 'repeat 10' dalam Scratch digunakan untuk...",
-        options: ["Menghentikan program", "Mengulang perintah di dalamnya sebanyak 10 kali", "Membuat 10 karakter baru", "Menunggu selama 10 detik"],
-        answer: 1,
-        explanation: "Blok 'repeat' adalah struktur perulangan (looping) untuk menjalankan aksi berkali-kali."
-      },
-
-      // BLOCKLY (5 Soal)
-      {
-        category: "Pemrograman Visual Blockly",
-        question: "Apa keunggulan utama pemrograman berbasis visual (seperti Blockly) bagi pemula dibanding bahasa berbasis teks?",
-        options: ["Program berjalan lebih lambat", "Mencegah kesalahan pengetikan sintaks (syntax error)", "Tidak membutuhkan komputer", "Kode tidak dapat diubah"],
-        answer: 1,
-        explanation: "Pemrograman visual menggunakan susunan blok puzzle sehingga siswa terhindar dari salah ketik penulisan kode."
-      },
-      {
-        category: "Pemrograman Visual Blockly",
-        question: "Teknik menyusun kode pada Scratch maupun Blockly dilakukan dengan cara...",
-        options: ["Mengetik sintaks manual", "Tarik dan Lepas (Drag and Drop) blok perintah", "Menggambar dengan kuas", "Mengunggah foto"],
-        answer: 1,
-        explanation: "Blok perintah disusun secara visual dengan cara menggeser (drag) dan melepas (drop) blok ke kanvas."
-      },
-      {
-        category: "Pemrograman Visual Blockly",
-        question: "Area kerja tempat menyusun dan merangkai blok-blok perintah pada Blockly dinamakan...",
-        options: ["Workspace", "Toolbox", "Console", "Terminal"],
-        answer: 0,
-        explanation: "Workspace adalah papan kanvas tempat siswa merangkai dan menghubungkan blok puzzle."
-      },
-      {
-        category: "Pemrograman Visual Blockly",
-        question: "Daftar pilihan kategori blok (seperti Logic, Loops, Math) yang tersedia di sisi samping Blockly dinamakan...",
-        options: ["Workspace", "Toolbox", "Stage", "Sprite List"],
-        answer: 1,
-        explanation: "Toolbox berisi kotak peralatan tempat memilih berbagai jenis blok perintah."
-      },
-      {
-        category: "Pemrograman Visual Blockly",
-        question: "Setiap blok pada Blockly memiliki bentuk lekukan khusus (puzzle-like notch) yang bertujuan untuk...",
-        options: ["Hanya sebagai hiasan", "Memastikan hanya blok dengan jenis/tipe yang cocok yang dapat terhubung", "Memperbesar ukuran file", "Membuat warna lebih menarik"],
-        answer: 1,
-        explanation: "Lekukan puzzle berfungsi memastikan logika pemrograman benar; blok yang tidak pas tidak bisa disambungkan."
+      8: {
+        quiz: [
+          {q: "Garis yang menunjukkan hubungan ayah dan anak di silsilah keluarga berfungsi sebagai...", options: ["Node", "Edge", "Root", "Leaf"], a: 1},
+          {q: "Struktur data manakah yang fokus pada rute/jalur?", options: ["Tree", "Graph", "Root", "Array"], a: 1},
+          {q: "Manakah contoh Leaf pada organisasi perusahaan?", options: ["CEO", "Direktur", "Manager", "Staff Magang"], a: 3},
+          {q: "Google Maps menggunakan struktur Graph karena...", options: ["Lebih keren", "Tidak butuh data", "Titik-titik kota saling terhubung rute/jalan", "Hanya satu jalur"], a: 2},
+          {q: "Pemahaman struktur data membantu kita...", options: ["Merakit komputer", "Membuat masalah jadi lebih rumit", "Mengatur informasi agar solusi lebih cepat ditemukan", "Mendesain gambar"], a: 2}
+        ]
       }
+    };
+
+    // BANK SOAL SCRATCH (5 Soal)
+    const scratchQuestions = [
+      {category: "Scratch", question: "Karakter atau objek utama pada Scratch yang dapat diberi perintah dinamakan...", options: ["Stage", "Sprite", "Script", "Backdrop"], answer: 1, explanation: "Sprite adalah objek visual pada Scratch yang diprogram untuk melakukan aksi."},
+      {category: "Scratch", question: "Area panggung tempat Sprite bergerak dan tampil pada aplikasi Scratch disebut...", options: ["Workspace", "Palette", "Stage", "Costume"], answer: 2, explanation: "Stage merupakan area layar tempat animasi atau game dijalankan."},
+      {category: "Scratch", question: "Blok perintah Scratch yang digunakan untuk memulai program saat bendera hijau diklik termasuk kategori...", options: ["Motion", "Events", "Control", "Sensing"], answer: 1, explanation: "Kategori Events memuat pemicu aksi seperti 'when green flag clicked'."},
+      {category: "Scratch", question: "Blok berwarna biru yang berisi perintah 'move 10 steps' berfungsi untuk...", options: ["Mengubah warna karakter", "Menggerakkan Sprite maju 10 langkah", "Mengulang perintah 10 kali", "Mengeluarkan suara"], answer: 1, explanation: "Blok Motion 'move 10 steps' berguna untuk memindahkan posisi Sprite."},
+      {category: "Scratch", question: "Blok perintah 'repeat 10' dalam Scratch digunakan untuk...", options: ["Menghentikan program", "Mengulang perintah di dalamnya 10 kali", "Membuat 10 karakter", "Menunggu 10 detik"], answer: 1, explanation: "Blok 'repeat' berfungsi melakukan proses perulangan (looping)."}
     ];
 
-    // STATE APLIKASI ULANGAN
+    // BANK SOAL BLOCKLY (5 Soal)
+    const blocklyQuestions = [
+      {category: "Blockly", question: "Keunggulan utama pemrograman visual berbasis blok (seperti Blockly) bagi pemula adalah...", options: ["Program berjalan lebih lambat", "Mencegah kesalahan pengetikan sintaks (syntax error)", "Tidak perlu komputer", "Kode tidak dapat diubah"], answer: 1, explanation: "Pemrograman blok menghindari salah ketik sintaks karena menggunakan puzzle visual."},
+      {category: "Blockly", question: "Teknik menyusun kode pada Scratch maupun Blockly dilakukan dengan cara...", options: ["Mengetik sintaks manual", "Tarik dan Lepas (Drag and Drop) blok perintah", "Menggambar dengan kuas", "Mengunggah foto"], answer: 1, explanation: "Menyusun blok dilakukan dengan menggeser (drag) dan melepas (drop) ke area kerja."},
+      {category: "Blockly", question: "Area kerja tempat menyusun dan merangkai blok-blok perintah pada Blockly dinamakan...", options: ["Workspace", "Toolbox", "Console", "Terminal"], answer: 0, explanation: "Workspace adalah papan kanvas tempat menghubungkan blok puzzle."},
+      {category: "Blockly", question: "Daftar pilihan kategori blok yang tersedia di sisi samping Blockly dinamakan...", options: ["Workspace", "Toolbox", "Stage", "Sprite List"], answer: 1, explanation: "Toolbox berisi pilihan berbagai kategori blok perintah."},
+      {category: "Blockly", question: "Setiap blok pada Blockly memiliki bentuk lekukan khusus (puzzle-like notch) yang bertujuan untuk...", options: ["Hanya hiasan", "Memastikan hanya blok dengan tipe cocok yang dapat terhubung", "Memperbesar ukuran file", "Mempercantik warna"], answer: 1, explanation: "Lekukan puzzle menjaga agar bentuk dan logika antar blok sesuai."}
+    ];
+
+    // STATE ULANGAN
+    let questions = [];
     let studentName = "";
     let studentClass = "";
     let currentQuestionIndex = 0;
-    let userAnswers = new Array(questions.length).fill(null);
+    let userAnswers = [];
     let timerInterval = null;
-    let totalTimeSeconds = 20 * 60; // 20 Menit
+    let totalTimeSeconds = 20 * 60;
     let timeSpentSeconds = 0;
 
-    // 1. START QUIZ
+    // Helper Shuffle Array
+    function shuffleArray(arr) {
+      const array = [...arr];
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+      }
+      return array;
+    }
+
+    // GENERATE 20 SOAL ACAK
+    function buildQuizQuestions() {
+      let poolTreeGraph = [];
+      Object.keys(gameVariations).forEach(key => {
+        gameVariations[key].quiz.forEach(q => {
+          poolTreeGraph.push({
+            category: "Struktur Data (Tree & Graph)",
+            question: q.q,
+            options: q.options,
+            answer: q.a,
+            explanation: `Jawaban yang benar adalah "${q.options[q.a]}".`
+          });
+        });
+      });
+
+      // Ambil 10 dari Tree/Graph, 5 Scratch, 5 Blockly
+      const selectedTreeGraph = shuffleArray(poolTreeGraph).slice(0, 10);
+      const selectedScratch = shuffleArray(scratchQuestions).slice(0, 5);
+      const selectedBlockly = shuffleArray(blocklyQuestions).slice(0, 5);
+
+      // Gabung dan acak total 20 soal
+      return shuffleArray([...selectedTreeGraph, ...selectedScratch, ...selectedBlockly]);
+    }
+
+    // 1. MULAI ULANGAN
     function startQuiz(event) {
       event.preventDefault();
       studentName = document.getElementById("student-name").value.trim();
       studentClass = document.getElementById("student-class").value.trim();
 
       if (!studentName || !studentClass) return;
+
+      questions = buildQuizQuestions();
+      userAnswers = new Array(questions.length).fill(null);
 
       document.getElementById("display-student-info").innerText = `${studentName} (${studentClass})`;
       document.getElementById("start-screen").classList.add("hidden");
@@ -414,7 +386,6 @@
     // 2. TIMER LOGIC
     function startTimer() {
       const timerDisplay = document.getElementById("timer-display");
-      
       timerInterval = setInterval(() => {
         totalTimeSeconds--;
         timeSpentSeconds++;
@@ -423,7 +394,6 @@
         const secs = totalTimeSeconds % 60;
         timerDisplay.innerText = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
 
-        // Warna peringatan timer
         if (totalTimeSeconds <= 60) {
           timerDisplay.parentElement.classList.remove("bg-indigo-800");
           timerDisplay.parentElement.classList.add("bg-rose-600", "pulse-animation");
@@ -440,7 +410,7 @@
       }, 1000);
     }
 
-    // 3. RENDER GRID NAVIGASI NOMOR
+    // 3. RENDER GRID NAVIGASI
     function renderQuestionGrid() {
       const gridContainer = document.getElementById("question-grid");
       gridContainer.innerHTML = "";
@@ -451,7 +421,6 @@
         btn.innerText = i + 1;
         btn.onclick = () => loadQuestion(i);
         btn.className = "w-full py-1.5 text-xs font-semibold rounded-md border transition text-center flex items-center justify-center ";
-        
         updateGridButtonState(i, btn);
         gridContainer.appendChild(btn);
       }
@@ -473,7 +442,7 @@
       }
     }
 
-    // 4. LOAD QUESTION
+    // 4. TAMPILKAN SOAL
     function loadQuestion(index) {
       currentQuestionIndex = index;
       const q = questions[index];
@@ -487,7 +456,6 @@
 
       q.options.forEach((optText, optIdx) => {
         const isSelected = userAnswers[index] === optIdx;
-        
         const optionBtn = document.createElement("button");
         optionBtn.onclick = () => selectOption(optIdx);
         optionBtn.className = `w-full text-left p-4 rounded-xl border-2 transition flex items-start space-x-3 text-sm font-medium ${
@@ -496,7 +464,7 @@
             : "border-slate-200 bg-white hover:border-slate-300 text-slate-700"
         }`;
 
-        const letter = String.fromCharCode(65 + optIdx); // A, B, C, D
+        const letter = String.fromCharCode(65 + optIdx);
         optionBtn.innerHTML = `
           <span class="w-7 h-7 rounded-lg text-xs font-bold flex items-center justify-center shrink-0 mt-0.5 ${
             isSelected ? "bg-indigo-600 text-white" : "bg-slate-100 text-slate-500"
@@ -506,7 +474,6 @@
         optionsContainer.appendChild(optionBtn);
       });
 
-      // Update Navigasi Tombol Bawah
       document.getElementById("prev-btn").disabled = (index === 0);
       
       const nextBtnText = document.getElementById("next-btn-text");
@@ -523,21 +490,16 @@
         nextBtn.className = "px-6 py-2.5 bg-indigo-600 text-white font-semibold rounded-xl hover:bg-indigo-700 transition flex items-center space-x-2 text-sm shadow-md shadow-indigo-600/20";
       }
 
-      // Refresh Grid Navigasi
       for (let i = 0; i < questions.length; i++) {
         updateGridButtonState(i);
       }
     }
 
-    // 5. PILIH JAWABAN (TANPA UMPAN BALIK LANGSUNG)
+    // 5. PILIH OPSI (TANPA FEEDBACK LANGSUNG)
     function selectOption(optionIndex) {
       userAnswers[currentQuestionIndex] = optionIndex;
-      
-      // Update info terjawab
       const answeredCount = userAnswers.filter(a => a !== null).length;
       document.getElementById("answered-count").innerText = `${answeredCount}/20 Terjawab`;
-
-      // Reload tampilan soal untuk update style tombol opsi pilihan
       loadQuestion(currentQuestionIndex);
     }
 
@@ -549,7 +511,6 @@
       if (currentQuestionIndex < questions.length - 1) {
         loadQuestion(currentQuestionIndex + 1);
       } else {
-        // Jika nomor 20, konfirmasi pengumpulan
         const unanswered = userAnswers.filter(a => a === null).length;
         let confirmMsg = "Apakah Anda yakin ingin menyelesaikan ulangan ini?";
         if (unanswered > 0) {
@@ -561,7 +522,7 @@
       }
     }
 
-    // 6. FINISH QUIZ & HITUNG NILAI
+    // 6. SELESAI & HITUNG NILAI
     function finishQuiz() {
       clearInterval(timerInterval);
 
@@ -577,7 +538,6 @@
       const secsSpent = timeSpentSeconds % 60;
       const durationStr = `${minsSpent}m ${secsSpent}s`;
 
-      // Render Hasil
       document.getElementById("quiz-screen").classList.add("hidden");
       document.getElementById("header-timer").classList.add("hidden");
       document.getElementById("result-screen").classList.remove("hidden");
@@ -588,7 +548,6 @@
       document.getElementById("wrong-count").innerText = wrongCount;
       document.getElementById("duration-count").innerText = durationStr;
 
-      // Predikat Nilai
       const scorePredicate = document.getElementById("score-predicate");
       const statusIcon = document.getElementById("status-icon");
 
@@ -609,10 +568,8 @@
         statusIcon.className = "w-20 h-20 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center mx-auto mb-4 text-3xl";
       }
 
-      // Generasi Pembahasan
       renderReviewSection();
 
-      // Kirim Data Nilai ke Google Sheets
       sendResultToWebhook({
         timestamp: new Date().toLocaleString("id-ID"),
         nama: studentName,
@@ -624,7 +581,7 @@
       });
     }
 
-    // 7. KIRIM DATA KE GOOGLE APPS SCRIPT WEBHOOK
+    // 7. KIRIM NILAI KE WEBHOOK GOOGLE SHEETS
     function sendResultToWebhook(data) {
       const webhookStatus = document.getElementById("webhook-status");
       
@@ -651,7 +608,7 @@
       });
     }
 
-    // 8. RENDER REVIEW SECTION
+    // 8. RENDER REVIEW PEMBAHASAN
     function renderReviewSection() {
       const reviewContainer = document.getElementById("review-container");
       reviewContainer.innerHTML = "";
@@ -698,7 +655,7 @@
       }
     }
 
-    // 9. SALIN TEKS RINGKASAN NILAI (FALLBACK)
+    // 9. SALIN RINGKASAN TEKS
     function copySummaryText() {
       const finalScore = document.getElementById("score-display").innerText;
       const correct = document.getElementById("correct-count").innerText;
