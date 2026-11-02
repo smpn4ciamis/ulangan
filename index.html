@@ -1,0 +1,1400 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ulangan Interaktif Informatika Kelas 9 SMP</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .glass-card {
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(12px);
+        }
+
+        /* Print Media Styles for Official Scorecard Printout */
+        @media print {
+            header, footer, #confettiCanvas, .no-print, button {
+                display: none !important;
+            }
+            body {
+                background: white !important;
+                color: black !important;
+            }
+            .print-container {
+                box-shadow: none !important;
+                border: none !important;
+                width: 100% !important;
+                max-width: 100% !important;
+                padding: 0 !important;
+                margin: 0 !important;
+            }
+            .print-header {
+                display: block !important;
+            }
+        }
+    </style>
+</head>
+<body class="bg-slate-100 text-slate-800 font-sans min-h-screen flex flex-col justify-between selection:bg-indigo-500 selection:text-white">
+
+    <!-- Header Navbar -->
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-sm no-print">
+        <div class="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 to-violet-600 flex items-center justify-center text-white shadow-md shadow-indigo-200">
+                    <i class="fa-solid fa-laptop-code text-xl"></i>
+                </div>
+                <div>
+                    <h1 class="font-extrabold text-base md:text-lg text-slate-800 leading-none">Ulangan Informatika Kelas 9</h1>
+                    <span class="text-xs font-semibold text-slate-500">Tree, Graph, Scratch & Blockly</span>
+                </div>
+            </div>
+            
+            <div class="flex items-center gap-2">
+                <!-- Teacher Settings Button -->
+                <button onclick="openTeacherModal()" title="Pengaturan Guru / Google Sheets" class="p-2.5 rounded-xl bg-indigo-50 text-indigo-700 hover:bg-indigo-100 border border-indigo-200 transition-all flex items-center gap-1.5 text-xs font-extrabold">
+                    <i class="fa-solid fa-gear"></i>
+                    <span class="hidden md:inline">Pengaturan Guru</span>
+                </button>
+
+                <!-- Live Countdown Timer Display -->
+                <div id="timerDisplayContainer" class="hidden px-3.5 py-2 rounded-xl bg-slate-100 border border-slate-200 text-xs font-bold text-slate-700 flex items-center gap-2 transition-all">
+                    <i class="fa-solid fa-clock text-indigo-600" id="timerIcon"></i>
+                    <span id="timerText">20:00</span>
+                </div>
+
+                <button id="soundToggleBtn" onclick="toggleSound()" class="p-2.5 rounded-xl bg-slate-100 text-slate-600 hover:bg-slate-200 transition-all flex items-center gap-2 text-xs font-bold">
+                    <i id="soundIcon" class="fa-solid fa-volume-high text-indigo-600"></i>
+                    <span id="soundLabel" class="hidden sm:inline">Suara: On</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Canvas for Confetti -->
+    <canvas id="confettiCanvas" class="fixed inset-0 pointer-events-none z-50 no-print"></canvas>
+
+    <!-- Main Container -->
+    <main class="max-w-3xl mx-auto px-4 py-6 w-full flex-grow flex items-center justify-center">
+
+        <!-- SCREEN 1: FORM IDENTITAS & WELCOME -->
+        <section id="welcomeScreen" class="w-full glass-card rounded-3xl p-6 md:p-10 shadow-xl border border-slate-200/80 text-center transition-all duration-300">
+            <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-indigo-50 text-indigo-700 font-bold text-xs mb-4 border border-indigo-100">
+                <i class="fa-solid fa-graduation-cap"></i> Evaluasi Harian Informatika
+            </div>
+            
+            <h2 class="text-2xl md:text-3xl font-extrabold text-slate-800 mb-2 leading-tight">
+                Ulangan Interaktif Informatika Kelas 9
+            </h2>
+            <p class="text-slate-600 text-xs md:text-sm max-w-lg mx-auto mb-5">
+                Isi data diri Anda di bawah ini untuk memulai ulangan (20 Soal Pilihan Ganda).
+            </p>
+
+            <!-- Google Sheets Connection Status Badge -->
+            <div id="sheetStatusBadge" class="max-w-md mx-auto mb-5 p-2.5 rounded-xl text-xs font-bold flex items-center justify-center gap-2 border">
+                <!-- Injected via JavaScript -->
+            </div>
+
+            <!-- FORM IDENTITAS SISWA -->
+            <div class="bg-slate-50 border border-slate-200 rounded-2xl p-5 mb-6 text-left space-y-4 max-w-md mx-auto">
+                <div>
+                    <label class="block text-xs font-extrabold text-slate-700 mb-1" for="studentNameInput">
+                        NAMA LENGKAP SISWA <span class="text-rose-500">*</span>
+                    </label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none text-slate-400">
+                            <i class="fa-solid fa-user"></i>
+                        </span>
+                        <input type="text" id="studentNameInput" oninput="validateForm()" placeholder="Contoh: Ahmad Rizky" 
+                            class="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none font-semibold text-sm transition-all bg-white text-slate-800">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-extrabold text-slate-700 mb-1" for="studentClassInput">
+                        KELAS <span class="text-rose-500">*</span>
+                    </label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none text-slate-400">
+                            <i class="fa-solid fa-users-rectangle"></i>
+                        </span>
+                        <input type="text" id="studentClassInput" oninput="validateForm()" placeholder="Contoh: 9A / 9B / 9-C" 
+                            class="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none font-semibold text-sm transition-all bg-white text-slate-800">
+                    </div>
+                </div>
+
+                <!-- Timer Info Badge -->
+                <div class="p-3 rounded-xl bg-amber-50 border border-amber-200 flex items-center gap-3 text-amber-900 text-xs font-bold">
+                    <i class="fa-solid fa-stopwatch text-amber-600 text-lg"></i>
+                    <div>
+                        <div>Waktu Pengerjaan: 20 Menit</div>
+                        <div class="text-[11px] font-normal text-amber-700">Waktu berjalan otomatis saat tombol mulai diklik.</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Ringkasan Materi Card Grid -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-2.5 mb-6 text-left">
+                <div class="p-3 rounded-xl bg-emerald-50 border border-emerald-100 flex flex-col gap-1">
+                    <span class="font-bold text-emerald-800 text-xs flex items-center gap-1.5">
+                        <i class="fa-solid fa-sitemap"></i> Tree (Pohon)
+                    </span>
+                    <span class="text-[11px] text-slate-500">Root, Leaf & Folder</span>
+                </div>
+                <div class="p-3 rounded-xl bg-violet-50 border border-violet-100 flex flex-col gap-1">
+                    <span class="font-bold text-violet-800 text-xs flex items-center gap-1.5">
+                        <i class="fa-solid fa-diagram-project"></i> Graph (Graf)
+                    </span>
+                    <span class="text-[11px] text-slate-500">Vertex, Edge & GPS</span>
+                </div>
+                <div class="p-3 rounded-xl bg-amber-50 border border-amber-100 flex flex-col gap-1">
+                    <span class="font-bold text-amber-800 text-xs flex items-center gap-1.5">
+                        <i class="fa-solid fa-cat"></i> Scratch
+                    </span>
+                    <span class="text-[11px] text-slate-500">Sprite & Motion</span>
+                </div>
+                <div class="p-3 rounded-xl bg-blue-50 border border-blue-100 flex flex-col gap-1">
+                    <span class="font-bold text-blue-800 text-xs flex items-center gap-1.5">
+                        <i class="fa-solid fa-cubes"></i> Blockly
+                    </span>
+                    <span class="text-[11px] text-slate-500">Puzzle & Syntax</span>
+                </div>
+            </div>
+
+            <button id="startBtn" onclick="startQuiz()" disabled 
+                class="w-full sm:w-auto px-8 py-3.5 rounded-2xl bg-indigo-600 text-white font-extrabold text-sm opacity-50 cursor-not-allowed transition-all flex items-center justify-center gap-2 mx-auto">
+                <i class="fa-solid fa-play"></i> Mulai Ulangan
+            </button>
+        </section>
+
+
+        <!-- SCREEN 2: QUIZ SCREEN -->
+        <section id="quizScreen" class="hidden w-full glass-card rounded-3xl p-5 md:p-8 shadow-xl border border-slate-200/80">
+            <!-- Student Header Badge -->
+            <div class="flex items-center justify-between pb-3 mb-3 border-b border-slate-200/80 text-xs text-slate-600">
+                <div class="flex items-center gap-2 font-bold text-slate-700">
+                    <i class="fa-solid fa-user-circle text-indigo-600 text-sm"></i>
+                    <span id="displayStudentInfo">Siswa: - | Kelas: -</span>
+                </div>
+                <span id="topicBadge" class="px-3 py-1 rounded-full text-[11px] font-extrabold bg-indigo-100 text-indigo-700">
+                    Topik
+                </span>
+            </div>
+
+            <!-- Quiz Progress & Quick Nav Grid -->
+            <div class="mb-4">
+                <div class="flex items-center justify-between mb-1.5">
+                    <span class="text-xs font-extrabold text-slate-500">PROGRESS SOAL</span>
+                    <span class="text-xs font-bold text-slate-500">
+                        Soal <span id="currentQNum" class="text-indigo-600 font-extrabold text-sm">1</span> dari <span id="totalQNum">20</span>
+                    </span>
+                </div>
+                <!-- Progress Bar -->
+                <div class="w-full bg-slate-200 rounded-full h-2 overflow-hidden p-0.5 mb-3">
+                    <div id="progressBar" class="bg-gradient-to-r from-indigo-500 to-violet-500 h-full rounded-full transition-all duration-300 w-0"></div>
+                </div>
+
+                <!-- Quick Question Navigation Grid (1-20 Buttons) -->
+                <div id="questionNavGrid" class="flex flex-wrap items-center justify-center gap-1.5 pt-1 border-t border-slate-100">
+                    <!-- Dynamic Question Buttons 1-20 injected here -->
+                </div>
+            </div>
+
+            <!-- Diagram Container (Interactive SVG) -->
+            <div id="diagramContainer" class="mb-4 p-3 rounded-2xl bg-slate-50 border border-slate-200 flex flex-col items-center justify-center min-h-[120px]">
+                <!-- Diagram SVG injected dynamically -->
+            </div>
+
+            <!-- Question Text -->
+            <h3 id="questionText" class="text-base md:text-lg font-bold text-slate-800 mb-4 leading-snug">
+                Teks Pertanyaan...
+            </h3>
+
+            <!-- Multiple Choice Options -->
+            <div id="optionsContainer" class="space-y-2.5 mb-5">
+                <!-- Options buttons injected dynamically -->
+            </div>
+
+            <!-- Feedback / Explanation Box -->
+            <div id="explanationBox" class="hidden p-4 rounded-2xl mb-5 transition-all border">
+                <div class="flex items-start gap-3">
+                    <div id="feedbackIcon" class="w-7 h-7 rounded-full flex items-center justify-center text-white shrink-0 mt-0.5 font-bold text-xs">
+                        <i class="fa-solid fa-check"></i>
+                    </div>
+                    <div>
+                        <h4 id="feedbackTitle" class="font-extrabold text-xs mb-0.5">Jawaban Benar!</h4>
+                        <p id="explanationText" class="text-xs text-slate-700 leading-relaxed">Penjelasan akan muncul di sini.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Button -->
+            <div class="flex justify-end">
+                <button id="nextBtn" onclick="nextQuestion()" disabled class="px-6 py-3 rounded-xl bg-slate-300 text-slate-500 font-bold text-xs transition-all flex items-center gap-2 cursor-not-allowed">
+                    Soal Berikutnya <i class="fa-solid fa-arrow-right"></i>
+                </button>
+            </div>
+        </section>
+
+
+        <!-- SCREEN 3: RESULT SCREEN (RAPOR ULANGAN) -->
+        <section id="resultScreen" class="hidden w-full glass-card rounded-3xl p-6 md:p-8 shadow-xl border border-slate-200/80 text-center print-container">
+            
+            <!-- Header khusus saat di-print PDF -->
+            <div class="hidden print-header text-left border-b border-black pb-4 mb-4">
+                <h1 class="text-xl font-bold">RAPOR HASIL ULANGAN HARIAN INFORMATIKA</h1>
+                <p class="text-xs">Materi: Struktur Data (Tree & Graf), Scratch & Blockly</p>
+            </div>
+
+            <!-- Google Sheets Live Send Status Banner -->
+            <div id="sheetSendStatusBanner" class="mb-5 p-3.5 rounded-2xl border text-xs font-bold flex items-center justify-center gap-2.5 transition-all">
+                <!-- Injected via JavaScript -->
+            </div>
+
+            <!-- Time Up Banner Notice (Shows only if time expired) -->
+            <div id="timeUpNotice" class="hidden mb-5 p-3.5 rounded-2xl bg-rose-100 border border-rose-300 text-rose-800 text-xs font-bold flex items-center justify-center gap-2">
+                <i class="fa-solid fa-clock-rotate-left text-rose-600 text-base"></i>
+                <span>Waktu Pengerjaan Habis! Jawaban Anda Telah Otomatis Disimpan.</span>
+            </div>
+
+            <div class="w-16 h-16 mx-auto mb-3 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 text-2xl shadow-inner no-print">
+                <i id="trophyIcon" class="fa-solid fa-trophy"></i>
+            </div>
+
+            <h2 class="text-xl md:text-2xl font-extrabold text-slate-800 mb-1">Hasil Ulangan Harian</h2>
+            
+            <!-- Informational Identitas Siswa pada Rapor -->
+            <div class="inline-block bg-slate-100 px-4 py-2 rounded-xl text-xs font-extrabold text-slate-700 mb-5 border border-slate-200">
+                Nama: <span id="resStudentName" class="text-indigo-600 font-bold"></span> &bull; 
+                Kelas: <span id="resStudentClass" class="text-indigo-600 font-bold"></span> &bull; 
+                Tanggal: <span id="resDate" class="text-slate-600"></span>
+            </div>
+
+            <!-- Score & Time Stats Grid -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+                <div class="p-3 rounded-2xl bg-indigo-50 border border-indigo-100 flex flex-col items-center justify-center">
+                    <span class="text-[10px] text-slate-500 font-extrabold mb-0.5">NILAI AKHIR</span>
+                    <span id="finalScore" class="text-3xl font-black text-indigo-600">0</span>
+                </div>
+                <div class="p-3 rounded-2xl bg-emerald-50 border border-emerald-100 flex flex-col items-center justify-center">
+                    <span class="text-[10px] text-slate-500 font-extrabold mb-0.5">BENAR</span>
+                    <span id="correctCount" class="text-2xl font-extrabold text-emerald-600">0</span>
+                </div>
+                <div class="p-3 rounded-2xl bg-rose-50 border border-rose-100 flex flex-col items-center justify-center">
+                    <span class="text-[10px] text-slate-500 font-extrabold mb-0.5">SALAH</span>
+                    <span id="wrongCount" class="text-2xl font-extrabold text-rose-500">0</span>
+                </div>
+                <div class="p-3 rounded-2xl bg-amber-50 border border-amber-100 flex flex-col items-center justify-center">
+                    <span class="text-[10px] text-slate-500 font-extrabold mb-0.5">WAKTU DIGUNAKAN</span>
+                    <span id="timeSpentText" class="text-xs sm:text-sm font-extrabold text-amber-800 leading-tight">00m 00s</span>
+                </div>
+            </div>
+
+            <!-- Predikat & Motivation Box -->
+            <div class="mb-6 p-4 rounded-2xl bg-slate-50 border border-slate-200">
+                <span class="text-[10px] font-extrabold text-slate-400 tracking-wider block mb-0.5">PREDIKAT EVALUASI</span>
+                <span id="badgeTitle" class="text-base md:text-lg font-extrabold text-slate-800">Sangat Baik! 🌟</span>
+            </div>
+
+            <!-- Action Buttons (Hidden when printing) -->
+            <div class="flex flex-wrap items-center justify-center gap-2.5 no-print">
+                <button onclick="window.print()" class="px-4 py-3 rounded-xl bg-slate-800 hover:bg-slate-900 text-white font-bold text-xs shadow-md transition-all flex items-center gap-2">
+                    <i class="fa-solid fa-print"></i> Cetak / Simpan PDF
+                </button>
+                <button onclick="copyScoreSummary()" class="px-4 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-md transition-all flex items-center gap-2">
+                    <i class="fa-solid fa-copy"></i> Salin Ringkasan Nilai
+                </button>
+                <button onclick="showReviewModal()" class="px-4 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-md transition-all flex items-center gap-2">
+                    <i class="fa-solid fa-list-check"></i> Tinjau Kunci Jawaban
+                </button>
+                <button onclick="restartQuiz()" class="px-4 py-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs transition-all flex items-center gap-2">
+                    <i class="fa-solid fa-rotate-right"></i> Ulangi Ulangan
+                </button>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- TEACHER SETTINGS MODAL (Google Sheets Setup) -->
+    <div id="teacherModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4 no-print">
+        <div class="bg-white w-full max-w-xl max-h-[90vh] rounded-3xl shadow-2xl flex flex-col overflow-hidden">
+            <div class="p-4 px-6 border-b border-slate-200 flex items-center justify-between bg-indigo-900 text-white">
+                <h3 class="font-extrabold flex items-center gap-2 text-sm">
+                    <i class="fa-solid fa-sliders text-amber-400"></i> Pengaturan Guru - Integrasi Google Sheets
+                </h3>
+                <button onclick="closeTeacherModal()" class="w-8 h-8 rounded-full bg-white/20 text-white flex items-center justify-center hover:bg-white/30">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            
+            <div class="p-6 overflow-y-auto space-y-4 text-left text-xs text-slate-700">
+                <p class="leading-relaxed">
+                    Masukkan <strong>URL Webhook Google Apps Script</strong> milik Anda di bawah ini agar nilai siswa dari semua Chromebook dapat **otomatis tersimpan secara real-time di Google Sheets Anda**.
+                </p>
+
+                <div>
+                    <label class="block font-extrabold text-slate-800 mb-1" for="webhookUrlInput">
+                        URL GOOGLE APPS SCRIPT WEBHOOK:
+                    </label>
+                    <input type="url" id="webhookUrlInput" placeholder="https://script.google.com/macros/s/.../exec"
+                        class="w-full px-4 py-3 rounded-xl border border-slate-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 font-mono text-xs bg-slate-50">
+                    <p class="text-[11px] text-slate-500 mt-1">URL ini akan tersimpan otomatis di browser ini (localStorage).</p>
+                </div>
+
+                <!-- Quick Setup Instructions Accordion -->
+                <div class="border border-indigo-100 rounded-2xl bg-indigo-50/50 p-4 space-y-2">
+                    <h4 class="font-extrabold text-indigo-900 flex items-center gap-1.5 text-xs">
+                        <i class="fa-solid fa-circle-info text-indigo-600"></i> Panduan Singkat Pemasangan (Cuma 1 Menit!):
+                    </h4>
+                    <ol class="list-decimal list-inside space-y-1 text-[11px] text-slate-600 leading-relaxed font-semibold">
+                        <li>Buka Google Sheets baru &amp; beri judul (misal: <em>Nilai Ulangan Informatika 9</em>).</li>
+                        <li>Klik menu <strong>Ekstensi &gt; Apps Script</strong>.</li>
+                        <li>Hapus semua kode lama, lalu tempel kode script di bawah ini:</li>
+                    </ol>
+
+                    <!-- Apps Script Code Box -->
+                    <div class="relative bg-slate-900 text-emerald-400 p-3 rounded-xl font-mono text-[10px] overflow-x-auto">
+                        <button onclick="copyAppsScriptCode()" class="absolute top-2 right-2 px-2.5 py-1 bg-indigo-600 text-white rounded-md text-[10px] font-sans font-bold hover:bg-indigo-700">
+                            <i class="fa-solid fa-copy"></i> Salin Kode
+                        </button>
+<pre id="appsScriptCode">function doPost(e) {
+  var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+  var data = JSON.parse(e.postData.contents);
+  sheet.appendRow([
+    new Date(),
+    data.nama,
+    data.kelas,
+    data.skor,
+    data.benar,
+    data.salah,
+    data.durasi
+  ]);
+  return ContentService.createTextOutput("Success").setMimeType(ContentService.MimeType.TEXT);
+}</pre>
+                    </div>
+
+                    <ol start="4" class="list-decimal list-inside space-y-1 text-[11px] text-slate-600 leading-relaxed font-semibold">
+                        <li>Klik tombol <strong>Terapkan (Deploy) &gt; Penerapan Baru (New Deployment)</strong>.</li>
+                        <li>Pilih Jenis: <strong>Aplikasi Web (Web App)</strong>.</li>
+                        <li>Ubah <em>Who has access (Siapa yang memiliki akses)</em> menjadi: <strong>Anyone (Siapa Saja)</strong>.</li>
+                        <li>Klik <strong>Terapkan</strong>, lalu salin <strong>URL Aplikasi Web</strong> dan tempel ke kolom di atas.</li>
+                    </ol>
+                </div>
+            </div>
+
+            <div class="p-4 border-t border-slate-200 bg-slate-50 flex items-center justify-between">
+                <button onclick="clearWebhookUrl()" class="text-rose-600 hover:text-rose-800 font-bold text-xs">
+                    Hapus Webhook
+                </button>
+                <button onclick="saveTeacherSettings()" class="px-6 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold text-xs shadow-md">
+                    <i class="fa-solid fa-floppy-disk"></i> Simpan Pengaturan
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- REVIEW MODAL -->
+    <div id="reviewModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4 no-print">
+        <div class="bg-white w-full max-w-2xl max-h-[85vh] rounded-3xl shadow-2xl flex flex-col overflow-hidden">
+            <div class="p-4 px-6 border-b border-slate-200 flex items-center justify-between bg-slate-50">
+                <h3 class="font-extrabold text-slate-800 flex items-center gap-2 text-sm">
+                    <i class="fa-solid fa-magnifying-glass text-indigo-600"></i> Pembahasan 20 Soal Ulangan
+                </h3>
+                <button onclick="closeReviewModal()" class="w-8 h-8 rounded-full bg-slate-200 text-slate-600 flex items-center justify-center hover:bg-slate-300">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <div id="reviewList" class="p-5 overflow-y-auto space-y-3.5 flex-grow text-left">
+                <!-- Review items rendered dynamically -->
+            </div>
+            <div class="p-4 border-t border-slate-200 bg-slate-50 text-right">
+                <button onclick="closeReviewModal()" class="px-5 py-2.5 rounded-xl bg-indigo-600 text-white font-bold text-xs hover:bg-indigo-700">Tutup Pembahasan</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-slate-200 py-3 text-center text-xs text-slate-500 no-print">
+        Informatika Kelas 9 SMP &bull; Kurikulum Merdeka &bull; Evaluasi Pemrograman Visual &amp; Struktur Data
+    </footer>
+
+    <!-- JavaScript Quiz Logic -->
+    <script>
+        // 20 SOAL INFORMATIKA KELAS 9 (Tree, Graph, Scratch, Blockly)
+        const questions = [
+            // TREE (5 SOAL)
+            {
+                topic: "Tree (Pohon)",
+                badgeColor: "bg-emerald-100 text-emerald-800",
+                svgType: "tree-root",
+                question: "Pada struktur data Pohon (Tree), simpul paling atas yang tidak memiliki simpul induk (parent) dinamakan...",
+                options: ["Simpul Daun (Leaf)", "Simpul Akar (Root)", "Simpul Anak (Child)", "Simpul Cabang (Branch)"],
+                answer: 1,
+                explanation: "<strong>Simpul Akar (Root)</strong> adalah hirarki posisi paling awal/teratas dalam struktur Pohon dan tidak memiliki induk di atasnya."
+            },
+            {
+                topic: "Tree (Pohon)",
+                badgeColor: "bg-emerald-100 text-emerald-800",
+                svgType: "tree-leaf",
+                question: "Simpul dalam struktur Pohon (Tree) yang berada di paling bawah dan tidak memiliki simpul anak (child) disebut...",
+                options: ["Simpul Akar (Root)", "Simpul Utama (Main Node)", "Simpul Daun (Leaf)", "Simpul Induk (Parent)"],
+                answer: 2,
+                explanation: "<strong>Simpul Daun (Leaf)</strong> merupakan simpul yang tidak lagi memiliki cabang anak (child = 0)."
+            },
+            {
+                topic: "Tree (Pohon)",
+                badgeColor: "bg-emerald-100 text-emerald-800",
+                svgType: "tree-folder",
+                question: "Manakah contoh penerapan struktur data Pohon (Tree) dalam sistem operasi komputer sehari-hari?",
+                options: ["Struktur direktori folder dan subfolder", "Daftar riwayat obrolan WhatsApp", "Antrean pencetakan dokumen printer", "Peta rute GPS lalu lintas"],
+                answer: 0,
+                explanation: "Struktur direktori folder (seperti <code>C:/Dokumen/Tugas/Informatika</code>) tersusun secara hirarkis seperti Pohon."
+            },
+            {
+                topic: "Tree (Pohon)",
+                badgeColor: "bg-emerald-100 text-emerald-800",
+                svgType: "tree-parent",
+                question: "Jika folder 'Informatika' berada di dalam folder 'Tugas SMP', maka hubungan folder 'Tugas SMP' terhadap folder 'Informatika' adalah...",
+                options: ["Folder Daun (Leaf)", "Folder Induk (Parent)", "Folder Anak (Child)", "Folder Akar (Root)"],
+                answer: 1,
+                explanation: "Folder yang memuat folder lain di dalamnya berperan sebagai <strong>Parent (Induk)</strong>."
+            },
+            {
+                topic: "Tree (Pohon)",
+                badgeColor: "bg-emerald-100 text-emerald-800",
+                svgType: "tree-edges",
+                question: "Sebuah Pohon (Tree) terhubung memiliki 6 simpul (node). Berapakah jumlah sisi (edge/garis penghubung) yang dimiliki pohon tersebut?",
+                options: ["6 sisi", "5 sisi", "7 sisi", "4 sisi"],
+                answer: 1,
+                explanation: "Secara matematis, sebuah Pohon terhubung dengan $n$ simpul selalu memiliki tepat $n - 1$ sisi ($6 - 1 = 5$ sisi)."
+            },
+
+            // GRAPH (5 SOAL)
+            {
+                topic: "Graph (Graf)",
+                badgeColor: "bg-violet-100 text-violet-800",
+                svgType: "graph-vertex-edge",
+                question: "Dua komponen utama pembentuk struktur data Graf (Graph) yang menyatakan objek dan hubungan antarobjek berturut-turut adalah...",
+                options: ["Akar (Root) dan Daun (Leaf)", "Simpul (Vertex) dan Sisi (Edge)", "Sprite dan Stage", "Block dan Workspace"],
+                answer: 1,
+                explanation: "Graf dibentuk oleh **Vertex (Simpul/Node)** sebagai objek dan **Edge (Sisi/Garis)** sebagai hubungan."
+            },
+            {
+                topic: "Graph (Graf)",
+                badgeColor: "bg-violet-100 text-violet-800",
+                svgType: "graph-undirected",
+                question: "Jaringan pertemanan Facebook di mana jika A berteman dengan B maka B otomatis berteman dengan A paling tepat dimodelkan sebagai...",
+                options: ["Graf Tak Berarah (Undirected Graph)", "Graf Berarah (Directed Graph)", "Graf Pohon (Tree)", "Graf Linier"],
+                answer: 0,
+                explanation: "Hubungan pertemanan dua arah simetris dimodelkan menggunakan **Graf Tak Berarah**."
+            },
+            {
+                topic: "Graph (Graf)",
+                badgeColor: "bg-violet-100 text-violet-800",
+                svgType: "graph-directed",
+                question: "Sistem pengikut (follower) di media sosial seperti Instagram (A bisa mengikuti B tanpa B harus mengikuti A) menggunakan konsep...",
+                options: ["Graf Tak Berarah (Undirected Graph)", "Graf Berarah (Directed Graph)", "Struktur Pohon (Tree)", "Graf Terbobot Tunggal"],
+                answer: 1,
+                explanation: "Hubungan satu arah (memiliki panah petunjuk) dinamakan **Graf Berarah (Directed Graph)**."
+            },
+            {
+                topic: "Graph (Graf)",
+                badgeColor: "bg-violet-100 text-violet-800",
+                svgType: "graph-weighted",
+                question: "Peta jaringan jalan antar-kota yang mencantumkan nilai angka jarak (kilometer) pada setiap lintasannya dinamakan...",
+                options: ["Graf Terbobot (Weighted Graph)", "Graf Akar", "Graf Kosong", "Graf Tunggal"],
+                answer: 0,
+                explanation: "Graf yang sisinya memiliki bobot nilai (seperti jarak, waktu, atau biaya) disebut **Graf Terbobot**."
+            },
+            {
+                topic: "Graph (Graf)",
+                badgeColor: "bg-violet-100 text-violet-800",
+                svgType: "graph-shortest",
+                question: "Aplikasi navigasi GPS (seperti Google Maps) mencari jalur paling cepat dari lokasi asal ke tujuan menggunakan konsep algoritma...",
+                options: ["Pencarian Lintasan Terpendek pada Graf", "Pengurutan Data Pohon", "Perulangan Blok Scratch", "Penyusunan Puzzle Blockly"],
+                answer: 0,
+                explanation: "Aplikasi GPS memodelkan jalan sebagai Graf dan menghitung lintasan terpendek (*Shortest Path*)."
+            },
+
+            // SCRATCH (5 SOAL)
+            {
+                topic: "Scratch",
+                badgeColor: "bg-amber-100 text-amber-800",
+                svgType: "scratch-sprite",
+                question: "Objek karakter visual dalam Scratch yang dapat digerakkan dan diberi perintah blok kode dinamakan...",
+                options: ["Backdrop", "Sprite", "Stage", "Script"],
+                answer: 1,
+                explanation: "<strong>Sprite</strong> adalah karakter atau objek visual utama yang kita program di Scratch."
+            },
+            {
+                topic: "Scratch",
+                badgeColor: "bg-amber-100 text-amber-800",
+                svgType: "scratch-stage",
+                question: "Area panggung tempat Sprite bergerak dan menampilkan hasil animasi/game pada Scratch disebut...",
+                options: ["Workspace", "Stage", "Costumes", "Toolbox"],
+                answer: 1,
+                explanation: "<strong>Stage</strong> adalah panggung utama tampilan layar hasil jalannya program Scratch."
+            },
+            {
+                topic: "Scratch",
+                badgeColor: "bg-amber-100 text-amber-800",
+                svgType: "scratch-events",
+                question: "Tombol berikon Bendera Hijau (Green Flag) pada Scratch berfungsi untuk...",
+                options: ["Menghapus Sprite", "Memulai / menjalankan skrip program", "Menghentikan program", "Menyimpan file"],
+                answer: 1,
+                explanation: "Bendera hijau (Events `when green flag clicked`) digunakan untuk memicu mulainya eksekusi program."
+            },
+            {
+                topic: "Scratch",
+                badgeColor: "bg-amber-100 text-amber-800",
+                svgType: "scratch-motion",
+                question: "Blok perintah warna biru Scratch berpemberitahuan 'move 10 steps' berfungsi untuk...",
+                options: ["Mengubah warna karakter", "Menggerakkan Sprite maju 10 langkah", "Memutar karakter 10 derajat", "Mengulangi perintah 10 kali"],
+                answer: 1,
+                explanation: "Blok `move 10 steps` termasuk kelompok **Motion** untuk menggerakkan Sprite."
+            },
+            {
+                topic: "Scratch",
+                badgeColor: "bg-amber-100 text-amber-800",
+                svgType: "scratch-control",
+                question: "Jika perintah 'move 10 steps' dimasukkan di dalam blok 'repeat 10', maka Sprite akan bergerak total...",
+                options: ["10 langkah", "20 langkah", "100 langkah", "0 langkah"],
+                answer: 2,
+                explanation: "Blok `repeat 10` mengulangi gerakan 10 langkah sebanyak 10 kali ($10 \\times 10 = 100$ langkah)."
+            },
+
+            // BLOCKLY (5 SOAL)
+            {
+                topic: "Blockly",
+                badgeColor: "bg-blue-100 text-blue-800",
+                svgType: "blockly-puzzle",
+                question: "Blockly merupakan pustaka pemrograman visual yang memungkinkan kita membuat kode perintah dengan cara...",
+                options: ["Menulis baris teks kode manual", "Menyusun dan memasangkan balok-balok puzzle", "Menggambar garis vektor", "Mengedit rekaman suara"],
+                answer: 1,
+                explanation: "Blockly berbasis visual di mana perintah disusun seperti memasangkan **balok-balok puzzle**."
+            },
+            {
+                topic: "Blockly",
+                badgeColor: "bg-blue-100 text-blue-800",
+                svgType: "blockly-syntax",
+                question: "Manakah salah satu keunggulan utama pemrograman visual (seperti Blockly) bagi pemula?",
+                options: ["Menghindarkan terjadinya kesalahan pengetikan sintaks (syntax error)", "Membuat komputer berjalan lebih cepat", "Tidak memerlukan daya listrik", "Otomatis menghasilkan game 3D"],
+                answer: 0,
+                explanation: "Karena balok hanya dapat pas dipasangkan jika logika cocok, siswa terhindar dari salah ketik perintah."
+            },
+            {
+                topic: "Blockly",
+                badgeColor: "bg-blue-100 text-blue-800",
+                svgType: "blockly-workspace",
+                question: "Area kanvas kosong tempat kita meletakkan dan merangkai balok-balok program Blockly dinamakan...",
+                options: ["Toolbox", "Workspace (Lembar Kerja)", "Stage", "Palette"],
+                answer: 1,
+                explanation: "<strong>Workspace</strong> adalah lembar kerja tempat merangkai blok-blok logika."
+            },
+            {
+                topic: "Blockly",
+                badgeColor: "bg-blue-100 text-blue-800",
+                svgType: "blockly-toolbox",
+                question: "Panel di samping yang berisi kategori pilihan balok (seperti Logic, Loops, Math, Text) dinamakan...",
+                options: ["Toolbox", "Workspace", "Terminal", "Console"],
+                answer: 0,
+                explanation: "<strong>Toolbox</strong> adalah kotak peralatan tempat memilih ragam balok perintah."
+            },
+            {
+                topic: "Blockly",
+                badgeColor: "bg-blue-100 text-blue-800",
+                svgType: "blockly-convert",
+                question: "Balok-balok logika yang telah kita susun di Blockly dapat dikonversi secara otomatis menjadi bahasa teks seperti...",
+                options: ["JavaScript, Python, atau PHP", "Microsoft Word dan Excel", "Format gambar JPG", "Format suara MP3"],
+                answer: 0,
+                explanation: "Blockly dapat mentranslasikan blok visual menjadi kode teks sungguhan seperti Python atau JavaScript."
+            }
+        ];
+
+        // Generator SVG Illustrations
+        function getSvgDiagram(type) {
+            switch(type) {
+                case 'tree-root':
+                    return `<svg class="w-full max-w-[240px] h-28" viewBox="0 0 240 110">
+                        <line x1="120" y1="25" x2="60" y2="75" stroke="#94a3b8" stroke-width="2.5"/>
+                        <line x1="120" y1="25" x2="180" y2="75" stroke="#94a3b8" stroke-width="2.5"/>
+                        <circle cx="120" cy="25" r="18" fill="#4f46e5" stroke="#4338ca" stroke-width="2"/>
+                        <text x="120" y="29" fill="white" font-weight="bold" font-size="11" text-anchor="middle">ROOT</text>
+                        <circle cx="60" cy="75" r="15" fill="#cbd5e1" stroke="#94a3b8" stroke-width="2"/>
+                        <text x="60" y="79" fill="#334155" font-weight="bold" font-size="10" text-anchor="middle">B</text>
+                        <circle cx="180" cy="75" r="15" fill="#cbd5e1" stroke="#94a3b8" stroke-width="2"/>
+                        <text x="180" y="79" fill="#334155" font-weight="bold" font-size="10" text-anchor="middle">C</text>
+                    </svg>`;
+                case 'tree-leaf':
+                    return `<svg class="w-full max-w-[240px] h-28" viewBox="0 0 240 110">
+                        <line x1="120" y1="20" x2="70" y2="55" stroke="#94a3b8" stroke-width="2"/>
+                        <line x1="120" y1="20" x2="170" y2="55" stroke="#94a3b8" stroke-width="2"/>
+                        <line x1="70" y1="55" x2="40" y2="90" stroke="#94a3b8" stroke-width="2"/>
+                        <line x1="70" y1="55" x2="100" y2="90" stroke="#94a3b8" stroke-width="2"/>
+                        <circle cx="120" cy="20" r="12" fill="#94a3b8"/><circle cx="70" cy="55" r="12" fill="#94a3b8"/><circle cx="170" cy="55" r="12" fill="#10b981" stroke="#059669" stroke-width="2"/>
+                        <circle cx="40" cy="90" r="12" fill="#10b981" stroke="#059669" stroke-width="2"/>
+                        <circle cx="100" cy="90" r="12" fill="#10b981" stroke="#059669" stroke-width="2"/>
+                        <text x="170" y="58" fill="white" font-weight="bold" font-size="9" text-anchor="middle">LEAF</text>
+                        <text x="40" y="93" fill="white" font-weight="bold" font-size="9" text-anchor="middle">LEAF</text>
+                        <text x="100" y="93" fill="white" font-weight="bold" font-size="9" text-anchor="middle">LEAF</text>
+                    </svg>`;
+                case 'tree-folder':
+                    return `<svg class="w-full max-w-[240px] h-28" viewBox="0 0 240 110">
+                        <rect x="20" y="10" width="70" height="25" rx="5" fill="#f59e0b"/>
+                        <text x="55" y="26" fill="white" font-weight="bold" font-size="10" text-anchor="middle">📁 Dokumen</text>
+                        <line x1="55" y1="35" x2="55" y2="55" stroke="#cbd5e1" stroke-width="2"/>
+                        <line x1="55" y1="55" x2="90" y2="55" stroke="#cbd5e1" stroke-width="2"/>
+                        <rect x="90" y="42" width="110" height="25" rx="5" fill="#3b82f6"/>
+                        <text x="145" y="58" fill="white" font-weight="bold" font-size="10" text-anchor="middle">📁 Tugas_Informatika</text>
+                        <line x1="145" y1="67" x2="145" y2="85" stroke="#cbd5e1" stroke-width="2"/>
+                        <line x1="145" y1="85" x2="160" y2="85" stroke="#cbd5e1" stroke-width="2"/>
+                        <rect x="160" y="75" width="70" height="22" rx="4" fill="#10b981"/>
+                        <text x="195" y="89" fill="white" font-size="9" font-weight="bold" text-anchor="middle">📄 Tugas.docx</text>
+                    </svg>`;
+                case 'tree-parent':
+                    return `<svg class="w-full max-w-[240px] h-28" viewBox="0 0 240 110">
+                        <rect x="70" y="10" width="100" height="30" rx="6" fill="#6366f1"/>
+                        <text x="120" y="29" fill="white" font-weight="bold" font-size="11" text-anchor="middle">📁 Tugas SMP (Parent)</text>
+                        <line x1="120" y1="40" x2="120" y2="65" stroke="#6366f1" stroke-width="2.5"/>
+                        <rect x="65" y="65" width="110" height="30" rx="6" fill="#8b5cf6"/>
+                        <text x="120" y="84" fill="white" font-weight="bold" font-size="10" text-anchor="middle">📁 Informatika (Child)</text>
+                    </svg>`;
+                case 'tree-edges':
+                    return `<svg class="w-full max-w-[240px] h-28" viewBox="0 0 240 110">
+                        <line x1="120" y1="20" x2="60" y2="55" stroke="#ef4444" stroke-width="2.5"/>
+                        <line x1="120" y1="20" x2="180" y2="55" stroke="#ef4444" stroke-width="2.5"/>
+                        <line x1="60" y1="55" x2="30" y2="90" stroke="#ef4444" stroke-width="2.5"/>
+                        <line x1="60" y1="55" x2="90" y2="90" stroke="#ef4444" stroke-width="2.5"/>
+                        <line x1="180" y1="55" x2="180" y2="90" stroke="#ef4444" stroke-width="2.5"/>
+                        <circle cx="120" cy="20" r="10" fill="#3b82f6"/><circle cx="60" cy="55" r="10" fill="#3b82f6"/><circle cx="180" cy="55" r="10" fill="#3b82f6"/>
+                        <circle cx="30" cy="90" r="10" fill="#3b82f6"/><circle cx="90" cy="90" r="10" fill="#3b82f6"/><circle cx="180" cy="90" r="10" fill="#3b82f6"/>
+                        <text x="120" y="105" fill="#ef4444" font-extrabold font-size="11" text-anchor="middle">6 Simpul (n) &rarr; 5 Sisi (n-1)</text>
+                    </svg>`;
+                case 'graph-vertex-edge':
+                    return `<svg class="w-full max-w-[240px] h-28" viewBox="0 0 240 110">
+                        <line x1="50" y1="30" x2="190" y2="30" stroke="#8b5cf6" stroke-width="3"/>
+                        <line x1="50" y1="30" x2="120" y2="85" stroke="#8b5cf6" stroke-width="3"/>
+                        <line x1="190" y1="30" x2="120" y2="85" stroke="#8b5cf6" stroke-width="3"/>
+                        <circle cx="50" cy="30" r="16" fill="#8b5cf6"/><text x="50" y="35" fill="white" font-bold font-size="10" text-anchor="middle">V1</text>
+                        <circle cx="190" cy="30" r="16" fill="#8b5cf6"/><text x="190" y="35" fill="white" font-bold font-size="10" text-anchor="middle">V2</text>
+                        <circle cx="120" cy="85" r="16" fill="#8b5cf6"/><text x="120" y="90" fill="white" font-bold font-size="10" text-anchor="middle">V3</text>
+                        <text x="120" y="24" fill="#6d28d9" font-bold font-size="10" text-anchor="middle">Edge (Sisi)</text>
+                    </svg>`;
+                case 'graph-undirected':
+                    return `<svg class="w-full max-w-[240px] h-28" viewBox="0 0 240 110">
+                        <line x1="60" y1="55" x2="180" y2="55" stroke="#3b82f6" stroke-width="4"/>
+                        <circle cx="60" cy="55" r="20" fill="#3b82f6"/>
+                        <circle cx="180" cy="55" r="20" fill="#3b82f6"/>
+                        <text x="60" y="59" fill="white" font-bold font-size="11" text-anchor="middle">Ahmad</text>
+                        <text x="180" y="59" fill="white" font-bold font-size="11" text-anchor="middle">Budi</text>
+                        <text x="120" y="45" fill="#1d4ed8" font-bold font-size="10" text-anchor="middle">&larr; Berteman 2 Arah &rarr;</text>
+                    </svg>`;
+                case 'graph-directed':
+                    return `<svg class="w-full max-w-[240px] h-28" viewBox="0 0 240 110">
+                        <defs><marker id="arrow" viewBox="0 0 10 10" refX="22" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#ec4899"/></marker></defs>
+                        <line x1="60" y1="55" x2="180" y2="55" stroke="#ec4899" stroke-width="3.5" marker-end="url(#arrow)"/>
+                        <circle cx="60" cy="55" r="20" fill="#ec4899"/>
+                        <circle cx="180" cy="55" r="20" fill="#ec4899"/>
+                        <text x="60" y="59" fill="white" font-bold font-size="10" text-anchor="middle">User A</text>
+                        <text x="180" y="59" fill="white" font-bold font-size="10" text-anchor="middle">User B</text>
+                        <text x="120" y="42" fill="#be185d" font-bold font-size="10" text-anchor="middle">Follows &rarr;</text>
+                    </svg>`;
+                case 'graph-weighted':
+                    return `<svg class="w-full max-w-[240px] h-28" viewBox="0 0 240 110">
+                        <line x1="40" y1="55" x2="120" y2="25" stroke="#64748b" stroke-width="2.5"/>
+                        <line x1="120" y1="25" x2="200" y2="55" stroke="#64748b" stroke-width="2.5"/>
+                        <line x1="40" y1="55" x2="200" y2="55" stroke="#64748b" stroke-width="2.5"/>
+                        <circle cx="40" cy="55" r="16" fill="#0284c7"/><text x="40" y="59" fill="white" font-bold font-size="9" text-anchor="middle">Kota A</text>
+                        <circle cx="120" cy="25" r="16" fill="#0284c7"/><text x="120" y="29" fill="white" font-bold font-size="9" text-anchor="middle">Kota B</text>
+                        <circle cx="200" cy="55" r="16" fill="#0284c7"/><text x="200" y="59" fill="white" font-bold font-size="9" text-anchor="middle">Kota C</text>
+                        <rect x="70" y="28" width="30" height="15" rx="3" fill="#f1f5f9"/><text x="85" y="39" font-bold font-size="9" fill="#0f172a" text-anchor="middle">12 km</text>
+                        <rect x="140" y="28" width="30" height="15" rx="3" fill="#f1f5f9"/><text x="155" y="39" font-bold font-size="9" fill="#0f172a" text-anchor="middle">15 km</text>
+                        <rect x="105" y="60" width="30" height="15" rx="3" fill="#f1f5f9"/><text x="120" y="71" font-bold font-size="9" fill="#0f172a" text-anchor="middle">25 km</text>
+                    </svg>`;
+                case 'graph-shortest':
+                    return `<svg class="w-full max-w-[240px] h-28" viewBox="0 0 240 110">
+                        <line x1="40" y1="60" x2="120" y2="25" stroke="#10b981" stroke-width="4"/>
+                        <line x1="120" y1="25" x2="200" y2="60" stroke="#10b981" stroke-width="4"/>
+                        <line x1="40" y1="60" x2="200" y2="60" stroke="#94a3b8" stroke-width="2" stroke-dasharray="4"/>
+                        <circle cx="40" cy="60" r="15" fill="#10b981"/><text x="40" y="64" fill="white" font-bold font-size="9" text-anchor="middle">Asal</text>
+                        <circle cx="120" cy="25" r="12" fill="#10b981"/>
+                        <circle cx="200" cy="60" r="15" fill="#ef4444"/><text x="200" y="64" fill="white" font-bold font-size="9" text-anchor="middle">Tujuan</text>
+                        <text x="120" y="90" fill="#059669" font-extrabold font-size="10" text-anchor="middle">&check; Rute Tercepat (Fastest Route)</text>
+                    </svg>`;
+                case 'scratch-sprite':
+                    return `<svg class="w-full max-w-[240px] h-28" viewBox="0 0 240 110">
+                        <rect x="20" y="10" width="200" height="90" rx="8" fill="#334155"/>
+                        <circle cx="120" cy="50" r="22" fill="#f59e0b"/>
+                        <polygon points="105,35 112,20 120,33" fill="#f59e0b"/>
+                        <polygon points="135,35 128,20 120,33" fill="#f59e0b"/>
+                        <circle cx="112" cy="46" r="3" fill="#1e293b"/>
+                        <circle cx="128" cy="46" r="3" fill="#1e293b"/>
+                        <path d="M 115 56 Q 120 62 125 56" stroke="#1e293b" stroke-width="2" fill="none"/>
+                        <text x="120" y="90" fill="#fbbf24" font-bold font-size="10" text-anchor="middle">Sprite Karakter Scratch</text>
+                    </svg>`;
+                case 'scratch-stage':
+                    return `<svg class="w-full max-w-[240px] h-28" viewBox="0 0 240 110">
+                        <rect x="30" y="10" width="180" height="90" rx="6" fill="#ffffff" stroke="#cbd5e1" stroke-width="3"/>
+                        <line x1="30" y1="55" x2="210" y2="55" stroke="#e2e8f0" stroke-width="1.5" stroke-dasharray="3"/>
+                        <line x1="120" y1="10" x2="120" y2="100" stroke="#e2e8f0" stroke-width="1.5" stroke-dasharray="3"/>
+                        <text x="120" y="58" fill="#94a3b8" font-bold font-size="9" text-anchor="middle">(X:0, Y:0)</text>
+                        <text x="120" y="25" fill="#475569" font-extrabold font-size="11" text-anchor="middle">STAGE (PANGGUNG)</text>
+                    </svg>`;
+                case 'scratch-events':
+                    return `<svg class="w-full max-w-[240px] h-28" viewBox="0 0 240 110">
+                        <path d="M 30 25 Q 60 10 90 25 L 210 25 L 210 75 L 30 75 Z" fill="#ffbf00" rx="5"/>
+                        <circle cx="55" cy="50" r="10" fill="#10b981"/>
+                        <polygon points="52,43 52,57 62,50" fill="white"/>
+                        <text x="75" y="54" fill="#422006" font-extrabold font-size="11">when green flag clicked</text>
+                    </svg>`;
+                case 'scratch-motion':
+                    return `<svg class="w-full max-w-[240px] h-28" viewBox="0 0 240 110">
+                        <rect x="30" y="30" width="180" height="50" rx="8" fill="#4c97ff"/>
+                        <text x="50" y="60" fill="white" font-extrabold font-size="12">move</text>
+                        <rect x="95" y="42" width="30" height="24" rx="12" fill="white"/>
+                        <text x="110" y="59" fill="#4c97ff" font-extrabold font-size="11" text-anchor="middle">10</text>
+                        <text x="135" y="60" fill="white" font-extrabold font-size="12">steps</text>
+                    </svg>`;
+                case 'scratch-control':
+                    return `<svg class="w-full max-w-[240px] h-28" viewBox="0 0 240 110">
+                        <rect x="30" y="10" width="180" height="90" rx="6" fill="#ffab19"/>
+                        <text x="45" y="30" fill="white" font-extrabold font-size="11">repeat</text>
+                        <rect x="90" y="16" width="25" height="18" rx="9" fill="white"/>
+                        <text x="102" y="30" fill="#d97706" font-bold font-size="10" text-anchor="middle">10</text>
+                        <rect x="55" y="40" width="145" height="30" rx="5" fill="#4c97ff"/>
+                        <text x="65" y="60" fill="white" font-extrabold font-size="10">move 10 steps</text>
+                    </svg>`;
+                case 'blockly-puzzle':
+                    return `<svg class="w-full max-w-[240px] h-28" viewBox="0 0 240 110">
+                        <path d="M 30 30 L 70 30 C 75 30 75 40 80 40 C 85 40 85 30 90 30 L 210 30 L 210 75 L 30 75 Z" fill="#2563eb"/>
+                        <text x="120" y="58" fill="white" font-extrabold font-size="12" text-anchor="middle">🧩 Balok Puzzle Blockly</text>
+                    </svg>`;
+                case 'blockly-syntax':
+                    return `<svg class="w-full max-w-[240px] h-28" viewBox="0 0 240 110">
+                        <rect x="20" y="20" width="95" height="70" rx="6" fill="#fee2e2" stroke="#f87171"/>
+                        <text x="67" y="45" fill="#991b1b" font-bold font-size="9" text-anchor="middle">Salah Ketik Teks</text>
+                        <text x="67" y="65" fill="#dc2626" font-mono font-bold font-size="10" text-anchor="middle">pritn("hi") ❌</text>
+                        <rect x="125" y="20" width="95" height="70" rx="6" fill="#dcfce7" stroke="#4ade80"/>
+                        <text x="172" y="45" fill="#166534" font-bold font-size="9" text-anchor="middle">Blockly Visual</text>
+                        <text x="172" y="65" fill="#15803d" font-bold font-size="10" text-anchor="middle">Bebas Error &check;</text>
+                    </svg>`;
+                case 'blockly-workspace':
+                    return `<svg class="w-full max-w-[240px] h-28" viewBox="0 0 240 110">
+                        <rect x="20" y="10" width="60" height="90" rx="4" fill="#e2e8f0"/>
+                        <text x="50" y="55" fill="#64748b" font-bold font-size="9" text-anchor="middle">Toolbox</text>
+                        <rect x="85" y="10" width="135" height="90" rx="4" fill="#f8fafc" stroke="#cbd5e1"/>
+                        <text x="152" y="55" fill="#475569" font-extrabold font-size="10" text-anchor="middle">WORKSPACE</text>
+                    </svg>`;
+                case 'blockly-toolbox':
+                    return `<svg class="w-full max-w-[240px] h-28" viewBox="0 0 240 110">
+                        <rect x="40" y="15" width="160" height="20" rx="4" fill="#5b80a5"/>
+                        <text x="50" y="29" fill="white" font-bold font-size="9">Logic</text>
+                        <rect x="40" y="40" width="160" height="20" rx="4" fill="#5ba55b"/>
+                        <text x="50" y="54" fill="white" font-bold font-size="9">Loops (Perulangan)</text>
+                        <rect x="40" y="65" width="160" height="20" rx="4" fill="#5ba5a5"/>
+                        <text x="50" y="79" fill="white" font-bold font-size="9">Math (Matematika)</text>
+                    </svg>`;
+                case 'blockly-convert':
+                    return `<svg class="w-full max-w-[240px] h-28" viewBox="0 0 240 110">
+                        <rect x="20" y="25" width="85" height="55" rx="5" fill="#2563eb"/>
+                        <text x="62" y="55" fill="white" font-bold font-size="10" text-anchor="middle">Blockly</text>
+                        <text x="120" y="58" fill="#4f46e5" font-extrabold font-size="14" text-anchor="middle">&rarr;</text>
+                        <rect x="135" y="25" width="85" height="55" rx="5" fill="#0f172a"/>
+                        <text x="177" y="50" fill="#38bdf8" font-mono font-bold font-size="9" text-anchor="middle">Python / JS</text>
+                        <text x="177" y="65" fill="#4ade80" font-mono font-size="8" text-anchor="middle">print("Hello")</text>
+                    </svg>`;
+                default:
+                    return '';
+            }
+        }
+
+        // State Variables
+        let studentName = "";
+        let studentClass = "";
+        let soundEnabled = true;
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let selectedAnswers = [];
+
+        // Timer Variables
+        const TOTAL_QUIZ_SECONDS = 20 * 60; // 20 minutes countdown
+        let remainingSeconds = TOTAL_QUIZ_SECONDS;
+        let timerInterval = null;
+        let isTimeUp = false;
+
+        // Teacher Webhook URL (stored in localStorage)
+        let teacherWebhookUrl = localStorage.getItem('teacher_webhook_url') || "";
+
+        // Web Audio API Sound generator
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+        function playSound(type) {
+            if (!soundEnabled) return;
+            try {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+
+                if (type === 'correct') {
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(523.25, audioCtx.currentTime); // C5
+                    osc.frequency.exponentialRampToValueAtTime(659.25, audioCtx.currentTime + 0.15); // E5
+                    gain.gain.setValueAtTime(0.25, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+                    osc.start();
+                    osc.stop(audioCtx.currentTime + 0.3);
+                } else if (type === 'wrong') {
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(220, audioCtx.currentTime); // A3
+                    osc.frequency.setValueAtTime(170, audioCtx.currentTime + 0.15);
+                    gain.gain.setValueAtTime(0.25, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+                    osc.start();
+                    osc.stop(audioCtx.currentTime + 0.3);
+                }
+            } catch(e){}
+        }
+
+        function toggleSound() {
+            soundEnabled = !soundEnabled;
+            const icon = document.getElementById('soundIcon');
+            const label = document.getElementById('soundLabel');
+            if (soundEnabled) {
+                icon.className = "fa-solid fa-volume-high text-indigo-600";
+                label.innerText = "Suara: On";
+            } else {
+                icon.className = "fa-solid fa-volume-xmark text-slate-400";
+                label.innerText = "Suara: Off";
+            }
+        }
+
+        // Initialize Webhook Status Badge on Screen 1
+        function renderSheetStatusBadge() {
+            const badge = document.getElementById('sheetStatusBadge');
+            teacherWebhookUrl = localStorage.getItem('teacher_webhook_url') || "";
+
+            if (teacherWebhookUrl) {
+                badge.className = "max-w-md mx-auto mb-5 p-2.5 rounded-xl text-xs font-bold flex items-center justify-center gap-2 border bg-emerald-50 text-emerald-800 border-emerald-200";
+                badge.innerHTML = `<i class="fa-solid fa-circle-check text-emerald-600"></i> Terhubung ke Google Sheets Guru`;
+            } else {
+                badge.className = "max-w-md mx-auto mb-5 p-2.5 rounded-xl text-xs font-bold flex items-center justify-center gap-2 border bg-amber-50 text-amber-800 border-amber-200";
+                badge.innerHTML = `<i class="fa-solid fa-circle-info text-amber-600"></i> Integrasi Google Sheets Belum Dikonfigurasi 
+                    <button onclick="openTeacherModal()" class="underline font-extrabold ml-1">Atur Sekarang</button>`;
+            }
+        }
+
+        function openTeacherModal() {
+            document.getElementById('webhookUrlInput').value = localStorage.getItem('teacher_webhook_url') || "";
+            document.getElementById('teacherModal').classList.remove('hidden');
+        }
+
+        function closeTeacherModal() {
+            document.getElementById('teacherModal').classList.add('hidden');
+        }
+
+        function saveTeacherSettings() {
+            const url = document.getElementById('webhookUrlInput').value.trim();
+            localStorage.setItem('teacher_webhook_url', url);
+            teacherWebhookUrl = url;
+            renderSheetStatusBadge();
+            closeTeacherModal();
+        }
+
+        function clearWebhookUrl() {
+            localStorage.removeItem('teacher_webhook_url');
+            teacherWebhookUrl = "";
+            document.getElementById('webhookUrlInput').value = "";
+            renderSheetStatusBadge();
+            closeTeacherModal();
+        }
+
+        function copyAppsScriptCode() {
+            const code = document.getElementById('appsScriptCode').innerText;
+            const textarea = document.createElement('textarea');
+            textarea.value = code;
+            document.body.appendChild(textarea);
+            textarea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textarea);
+            alert('Kode Google Apps Script berhasil disalin!');
+        }
+
+        function validateForm() {
+            const nameVal = document.getElementById('studentNameInput').value.trim();
+            const classVal = document.getElementById('studentClassInput').value.trim();
+            const startBtn = document.getElementById('startBtn');
+
+            if (nameVal !== "" && classVal !== "") {
+                startBtn.disabled = false;
+                startBtn.className = "w-full sm:w-auto px-8 py-3.5 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold text-sm shadow-lg shadow-indigo-300 transition-all flex items-center justify-center gap-2 mx-auto cursor-pointer active:scale-95";
+            } else {
+                startBtn.disabled = true;
+                startBtn.className = "w-full sm:w-auto px-8 py-3.5 rounded-2xl bg-indigo-600 text-white font-extrabold text-sm opacity-50 cursor-not-allowed transition-all flex items-center justify-center gap-2 mx-auto";
+            }
+        }
+
+        // TIMER FUNCTIONS
+        function startTimer() {
+            remainingSeconds = TOTAL_QUIZ_SECONDS;
+            isTimeUp = false;
+            document.getElementById('timerDisplayContainer').classList.remove('hidden');
+            updateTimerUI();
+
+            clearInterval(timerInterval);
+            timerInterval = setInterval(() => {
+                remainingSeconds--;
+                updateTimerUI();
+
+                if (remainingSeconds <= 0) {
+                    clearInterval(timerInterval);
+                    isTimeUp = true;
+                    handleTimeUp();
+                }
+            }, 1000);
+        }
+
+        function updateTimerUI() {
+            const minutes = Math.floor(remainingSeconds / 60);
+            const seconds = remainingSeconds % 60;
+            const formattedMinutes = String(minutes).padStart(2, '0');
+            const formattedSeconds = String(seconds).padStart(2, '0');
+            
+            const timerText = document.getElementById('timerText');
+            const timerContainer = document.getElementById('timerDisplayContainer');
+            
+            timerText.innerText = `${formattedMinutes}:${formattedSeconds}`;
+
+            // Adaptive color styling
+            if (remainingSeconds <= 60) {
+                // Red & pulsing when < 1 min
+                timerContainer.className = "px-3.5 py-2 rounded-xl bg-rose-100 border border-rose-300 text-xs font-bold text-rose-700 flex items-center gap-2 transition-all animate-pulse";
+            } else if (remainingSeconds <= 300) {
+                // Yellow when < 5 mins
+                timerContainer.className = "px-3.5 py-2 rounded-xl bg-amber-100 border border-amber-300 text-xs font-bold text-amber-800 flex items-center gap-2 transition-all";
+            } else {
+                // Normal
+                timerContainer.className = "px-3.5 py-2 rounded-xl bg-slate-100 border border-slate-200 text-xs font-bold text-slate-700 flex items-center gap-2 transition-all";
+            }
+        }
+
+        function stopTimer() {
+            clearInterval(timerInterval);
+            document.getElementById('timerDisplayContainer').classList.add('hidden');
+        }
+
+        function handleTimeUp() {
+            stopTimer();
+            // Automatically mark un-answered questions as skipped
+            for (let i = 0; i < questions.length; i++) {
+                if (!selectedAnswers[i]) {
+                    selectedAnswers[i] = {
+                        question: questions[i].question,
+                        userAnswer: -1,
+                        correctAnswer: questions[i].answer,
+                        options: questions[i].options,
+                        explanation: questions[i].explanation,
+                        isCorrect: false
+                    };
+                }
+            }
+            document.getElementById('timeUpNotice').classList.remove('hidden');
+            showResults();
+        }
+
+        function renderQuestionNavGrid() {
+            const container = document.getElementById('questionNavGrid');
+            container.innerHTML = '';
+            
+            questions.forEach((_, idx) => {
+                const btn = document.createElement('button');
+                const isAnswered = selectedAnswers[idx] !== undefined;
+                const isCurrent = idx === currentQuestionIndex;
+
+                let stateClasses = "bg-slate-100 text-slate-600 border-slate-200";
+                if (isCurrent) {
+                    stateClasses = "bg-indigo-600 text-white font-extrabold border-indigo-700 shadow-sm scale-105";
+                } else if (isAnswered) {
+                    if (selectedAnswers[idx].isCorrect) {
+                        stateClasses = "bg-emerald-500 text-white font-bold border-emerald-600";
+                    } else {
+                        stateClasses = "bg-rose-500 text-white font-bold border-rose-600";
+                    }
+                }
+
+                btn.className = `w-7 h-7 rounded-lg border text-[11px] flex items-center justify-center transition-all ${stateClasses}`;
+                btn.innerText = idx + 1;
+                btn.onclick = () => {
+                    currentQuestionIndex = idx;
+                    loadQuestion();
+                };
+                container.appendChild(btn);
+            });
+        }
+
+        function startQuiz() {
+            studentName = document.getElementById('studentNameInput').value.trim();
+            studentClass = document.getElementById('studentClassInput').value.trim();
+
+            if (!studentName || !studentClass) return;
+
+            document.getElementById('displayStudentInfo').innerText = `Siswa: ${studentName} | Kelas: ${studentClass}`;
+            document.getElementById('timeUpNotice').classList.add('hidden');
+            
+            currentQuestionIndex = 0;
+            score = 0;
+            selectedAnswers = [];
+
+            document.getElementById('welcomeScreen').classList.add('hidden');
+            document.getElementById('resultScreen').classList.add('hidden');
+            document.getElementById('quizScreen').classList.remove('hidden');
+
+            document.getElementById('totalQNum').innerText = questions.length;
+            
+            startTimer();
+            loadQuestion();
+        }
+
+        function loadQuestion() {
+            const q = questions[currentQuestionIndex];
+
+            // Render Nav Grid
+            renderQuestionNavGrid();
+
+            // Reset Feedback UI
+            const explanationBox = document.getElementById('explanationBox');
+            const nextBtn = document.getElementById('nextBtn');
+            explanationBox.classList.add('hidden');
+
+            // Header info & progress bar
+            document.getElementById('currentQNum').innerText = currentQuestionIndex + 1;
+            const progressPercent = ((currentQuestionIndex + 1) / questions.length) * 100;
+            document.getElementById('progressBar').style.width = `${progressPercent}%`;
+
+            // Topic Badge
+            const topicBadge = document.getElementById('topicBadge');
+            topicBadge.innerText = q.topic;
+            topicBadge.className = `px-3 py-1 rounded-full text-[11px] font-extrabold ${q.badgeColor}`;
+
+            // Diagram
+            document.getElementById('diagramContainer').innerHTML = getSvgDiagram(q.svgType);
+
+            // Question Text
+            document.getElementById('questionText').innerText = q.question;
+
+            // Render Options
+            const optionsContainer = document.getElementById('optionsContainer');
+            optionsContainer.innerHTML = '';
+
+            const isAlreadyAnswered = selectedAnswers[currentQuestionIndex] !== undefined;
+
+            q.options.forEach((opt, idx) => {
+                const btn = document.createElement('button');
+                btn.className = "w-full p-3.5 rounded-2xl bg-white border border-slate-200 hover:border-indigo-400 hover:bg-indigo-50/40 text-left font-semibold text-slate-700 text-xs sm:text-sm transition-all flex items-center justify-between group active:scale-[0.99]";
+                btn.onclick = () => selectAnswer(idx);
+                btn.innerHTML = `
+                    <div class="flex items-center gap-3">
+                        <span class="w-6 h-6 rounded-lg bg-slate-100 text-slate-600 group-hover:bg-indigo-600 group-hover:text-white flex items-center justify-center font-bold text-xs transition-colors shrink-0">
+                            ${String.fromCharCode(65 + idx)}
+                        </span>
+                        <span>${opt}</span>
+                    </div>
+                    <i class="fa-regular fa-circle text-slate-300 group-hover:text-indigo-400"></i>
+                `;
+                optionsContainer.appendChild(btn);
+            });
+
+            if (isAlreadyAnswered) {
+                // Restore previous selection UI if revisit
+                const prev = selectedAnswers[currentQuestionIndex];
+                renderAnsweredState(prev.userAnswer, prev.isCorrect, q.answer, q.explanation);
+            } else {
+                nextBtn.disabled = true;
+                nextBtn.className = "px-6 py-3 rounded-xl bg-slate-300 text-slate-500 font-bold text-xs transition-all flex items-center gap-2 cursor-not-allowed";
+            }
+        }
+
+        function selectAnswer(selectedIndex) {
+            const q = questions[currentQuestionIndex];
+            const isCorrect = selectedIndex === q.answer;
+
+            if (selectedAnswers[currentQuestionIndex] === undefined) {
+                if (isCorrect) {
+                    score++;
+                    playSound('correct');
+                } else {
+                    playSound('wrong');
+                }
+            }
+
+            selectedAnswers[currentQuestionIndex] = {
+                question: q.question,
+                userAnswer: selectedIndex,
+                correctAnswer: q.answer,
+                options: q.options,
+                explanation: q.explanation,
+                isCorrect: isCorrect
+            };
+
+            renderQuestionNavGrid();
+            renderAnsweredState(selectedIndex, isCorrect, q.answer, q.explanation);
+        }
+
+        function renderAnsweredState(selectedIndex, isCorrect, correctAnswer, explanation) {
+            const optionsContainer = document.getElementById('optionsContainer');
+            const buttons = optionsContainer.querySelectorAll('button');
+
+            buttons.forEach((btn, idx) => {
+                btn.disabled = true;
+                const icon = btn.querySelector('i');
+                if (idx === correctAnswer) {
+                    btn.className = "w-full p-3.5 rounded-2xl bg-emerald-50 border-2 border-emerald-500 text-emerald-900 font-bold text-xs sm:text-sm flex items-center justify-between";
+                    icon.className = "fa-solid fa-circle-check text-emerald-600 text-base";
+                } else if (idx === selectedIndex && !isCorrect) {
+                    btn.className = "w-full p-3.5 rounded-2xl bg-rose-50 border-2 border-rose-400 text-rose-900 font-semibold text-xs sm:text-sm flex items-center justify-between";
+                    icon.className = "fa-solid fa-circle-xmark text-rose-500 text-base";
+                } else {
+                    btn.className = "w-full p-3.5 rounded-2xl bg-slate-50 border border-slate-200 opacity-50 text-slate-500 font-normal text-xs sm:text-sm flex items-center justify-between";
+                }
+            });
+
+            // Show explanation box
+            const explanationBox = document.getElementById('explanationBox');
+            const feedbackIcon = document.getElementById('feedbackIcon');
+            const feedbackTitle = document.getElementById('feedbackTitle');
+            const explanationText = document.getElementById('explanationText');
+
+            explanationBox.classList.remove('hidden');
+            if (isCorrect) {
+                explanationBox.className = "p-3.5 rounded-2xl mb-5 transition-all bg-emerald-50 border border-emerald-200 text-emerald-900";
+                feedbackIcon.className = "w-7 h-7 rounded-full bg-emerald-500 text-white flex items-center justify-center shrink-0 font-bold text-xs";
+                feedbackIcon.innerHTML = `<i class="fa-solid fa-check"></i>`;
+                feedbackTitle.innerText = "Jawaban Benar! 🎉";
+            } else {
+                explanationBox.className = "p-3.5 rounded-2xl mb-5 transition-all bg-rose-50 border border-rose-200 text-rose-900";
+                feedbackIcon.className = "w-7 h-7 rounded-full bg-rose-500 text-white flex items-center justify-center shrink-0 font-bold text-xs";
+                feedbackIcon.innerHTML = `<i class="fa-solid fa-xmark"></i>`;
+                feedbackTitle.innerText = "Jawaban Kurang Tepat";
+            }
+            explanationText.innerHTML = explanation;
+
+            const nextBtn = document.getElementById('nextBtn');
+            nextBtn.disabled = false;
+            nextBtn.className = "px-6 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold text-xs shadow-md transition-all flex items-center gap-2 cursor-pointer active:scale-95";
+        }
+
+        function nextQuestion() {
+            if (currentQuestionIndex < questions.length - 1) {
+                currentQuestionIndex++;
+                loadQuestion();
+            } else {
+                showResults();
+            }
+        }
+
+        // Automatic Google Sheets HTTP POST Request Handler
+        function sendResultsToGoogleSheets(scorePercentage, correctCnt, wrongCnt, formattedTimeSpent) {
+            const statusBanner = document.getElementById('sheetSendStatusBanner');
+            teacherWebhookUrl = localStorage.getItem('teacher_webhook_url') || "";
+
+            if (!teacherWebhookUrl) {
+                statusBanner.className = "mb-5 p-3.5 rounded-2xl border text-xs font-bold flex items-center justify-center gap-2 bg-amber-50 text-amber-800 border-amber-200";
+                statusBanner.innerHTML = `<i class="fa-solid fa-triangle-exclamation text-amber-600"></i> Mode Offline: Nilai tidak dikirim otomatis (Webhook Google Sheets Belum Dikonfigurasi Guru).`;
+                return;
+            }
+
+            // Show Sending State
+            statusBanner.className = "mb-5 p-3.5 rounded-2xl border text-xs font-bold flex items-center justify-center gap-2 bg-indigo-50 text-indigo-800 border-indigo-200 animate-pulse";
+            statusBanner.innerHTML = `<i class="fa-solid fa-spinner fa-spin text-indigo-600"></i> Mengirim data nilai ke Google Sheets Guru...`;
+
+            const payload = {
+                nama: studentName,
+                kelas: studentClass,
+                skor: scorePercentage,
+                benar: correctCnt,
+                salah: wrongCnt,
+                durasi: formattedTimeSpent
+            };
+
+            fetch(teacherWebhookUrl, {
+                method: 'POST',
+                mode: 'no-cors', // standard cross-origin mode for Google Apps Script Web App
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            }).then(() => {
+                statusBanner.className = "mb-5 p-3.5 rounded-2xl border text-xs font-bold flex items-center justify-center gap-2 bg-emerald-50 text-emerald-800 border-emerald-200";
+                statusBanner.innerHTML = `<i class="fa-solid fa-circle-check text-emerald-600 text-base"></i> Nilai Berhasil Otomatis Terkirim ke Google Sheets Guru!`;
+            }).catch((err) => {
+                console.error(err);
+                statusBanner.className = "mb-5 p-3.5 rounded-2xl border text-xs font-bold flex items-center justify-center gap-2 bg-rose-50 text-rose-800 border-rose-200";
+                statusBanner.innerHTML = `<i class="fa-solid fa-circle-xmark text-rose-600"></i> Gagal Mengirim Nilai ke Google Sheets. Silakan gunakan tombol "Salin Ringkasan Nilai".`;
+            });
+        }
+
+        function copyScoreSummary() {
+            const total = questions.length;
+            const percentage = Math.round((score / total) * 100);
+            const timeSpentSeconds = TOTAL_QUIZ_SECONDS - remainingSeconds;
+            const spentMin = Math.floor(timeSpentSeconds / 60);
+            const spentSec = timeSpentSeconds % 60;
+
+            const summaryText = `[HASIL ULANGAN INFORMATIKA KELAS 9]\nNama: ${studentName}\nKelas: ${studentClass}\nNilai Akhir: ${percentage}\nBenar: ${score}/${total}\nSalah: ${total - score}\nDurasi: ${spentMin}m ${spentSec}s\nTanggal: ${new Date().toLocaleDateString('id-ID')}`;
+
+            const textarea = document.createElement('textarea');
+            textarea.value = summaryText;
+            document.body.appendChild(textarea);
+            textarea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textarea);
+
+            alert('Ringkasan nilai berhasil disalin ke clipboard! Anda dapat menempelkannya (paste) ke Google Classroom atau WhatsApp Guru.');
+        }
+
+        function showResults() {
+            stopTimer();
+
+            document.getElementById('quizScreen').classList.add('hidden');
+            document.getElementById('resultScreen').classList.remove('hidden');
+
+            const total = questions.length; // 20
+            const percentage = Math.round((score / total) * 100);
+
+            // Time used calculation
+            const timeSpentSeconds = TOTAL_QUIZ_SECONDS - remainingSeconds;
+            const spentMin = Math.floor(timeSpentSeconds / 60);
+            const spentSec = timeSpentSeconds % 60;
+            const formattedTimeSpent = `${spentMin}m ${spentSec}s`;
+            document.getElementById('timeSpentText').innerText = formattedTimeSpent;
+
+            document.getElementById('resStudentName').innerText = studentName;
+            document.getElementById('resStudentClass').innerText = studentClass;
+            
+            const now = new Date();
+            document.getElementById('resDate').innerText = `${now.getDate()}/${now.getMonth()+1}/${now.getFullYear()}`;
+
+            document.getElementById('finalScore').innerText = percentage;
+            document.getElementById('correctCount').innerText = score;
+            document.getElementById('wrongCount').innerText = total - score;
+
+            const badgeTitle = document.getElementById('badgeTitle');
+            const trophyIcon = document.getElementById('trophyIcon');
+
+            if (percentage >= 75) {
+                badgeTitle.innerText = "Sangat Baik (Master Informatika) 🌟";
+                trophyIcon.className = "fa-solid fa-trophy text-amber-500";
+                launchConfetti();
+            } else if (percentage >= 60) {
+                badgeTitle.innerText = "Baik (Sudah Memahami Materi) 👍";
+                trophyIcon.className = "fa-solid fa-medal text-indigo-500";
+            } else if (percentage >= 40) {
+                badgeTitle.innerText = "Cukup (Perlu Sedikit Latihan) 📚";
+                trophyIcon.className = "fa-solid fa-book-open text-amber-600";
+            } else {
+                badgeTitle.innerText = "Perlu Belajar Lebih Giat 💪";
+                trophyIcon.className = "fa-solid fa-triangle-exclamation text-rose-500";
+            }
+
+            // Trigger Google Sheets auto send
+            sendResultsToGoogleSheets(percentage, score, total - score, formattedTimeSpent);
+        }
+
+        function restartQuiz() {
+            document.getElementById('resultScreen').classList.add('hidden');
+            document.getElementById('welcomeScreen').classList.remove('hidden');
+            renderSheetStatusBadge();
+        }
+
+        function showReviewModal() {
+            const reviewList = document.getElementById('reviewList');
+            reviewList.innerHTML = '';
+
+            selectedAnswers.forEach((item, idx) => {
+                const card = document.createElement('div');
+                card.className = `p-3.5 rounded-2xl border ${item.isCorrect ? 'bg-emerald-50/50 border-emerald-200' : 'bg-rose-50/50 border-rose-200'}`;
+                
+                card.innerHTML = `
+                    <div class="flex items-start justify-between gap-2 mb-1.5">
+                        <span class="text-[11px] font-extrabold ${item.isCorrect ? 'text-emerald-700' : 'text-rose-700'}">
+                            Soal ${idx + 1} &bull; ${item.isCorrect ? 'BENAR' : 'SALAH'}
+                        </span>
+                        <i class="fa-solid ${item.isCorrect ? 'fa-circle-check text-emerald-600' : 'fa-circle-xmark text-rose-500'}"></i>
+                    </div>
+                    <p class="font-bold text-slate-800 text-xs mb-2">${item.question}</p>
+                    <div class="text-xs space-y-1 mb-2">
+                        <div class="text-slate-600">Jawaban Siswa: <span class="font-bold ${item.isCorrect ? 'text-emerald-700' : 'text-rose-600'}">${item.userAnswer >= 0 ? item.options[item.userAnswer] : '[Tidak Dijawab]'}</span></div>
+                        ${!item.isCorrect ? `<div class="text-emerald-700 font-bold">Kunci Jawaban: ${item.options[item.correctAnswer]}</div>` : ''}
+                    </div>
+                    <p class="text-[11px] text-slate-600 bg-white p-2.5 rounded-xl border border-slate-200">${item.explanation}</p>
+                `;
+                reviewList.appendChild(card);
+            });
+
+            document.getElementById('reviewModal').classList.remove('hidden');
+        }
+
+        function closeReviewModal() {
+            document.getElementById('reviewModal').classList.add('hidden');
+        }
+
+        function launchConfetti() {
+            const canvas = document.getElementById('confettiCanvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            const particles = [];
+            const colors = ['#6366F1', '#10B981', '#F59E0B', '#EC4899', '#8B5CF6'];
+
+            for (let i = 0; i < 80; i++) {
+                particles.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height - canvas.height,
+                    size: Math.random() * 7 + 4,
+                    color: colors[Math.floor(Math.random() * colors.length)],
+                    vy: Math.random() * 3 + 2,
+                    vx: Math.random() * 2 - 1
+                });
+            }
+
+            let animationFrame;
+            function render() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                let alive = false;
+                particles.forEach(p => {
+                    p.y += p.vy;
+                    p.x += p.vx;
+                    ctx.fillStyle = p.color;
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                    ctx.fill();
+                    if (p.y < canvas.height) alive = true;
+                });
+                if (alive) animationFrame = requestAnimationFrame(render);
+            }
+            render();
+            setTimeout(() => cancelAnimationFrame(animationFrame), 4000);
+        }
+
+        // Initialize App on Load
+        window.onload = function() {
+            renderSheetStatusBadge();
+        };
+    </script>
+</body>
+</html>
